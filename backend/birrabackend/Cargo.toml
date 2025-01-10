@@ -1,0 +1,37 @@
+[package]
+name = "birrabackend"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+# anyhow para facilitar o tratamento de erros
+anyhow = "1.0"
+
+# Axum: Framework web minimalista
+axum = { version = "0.6", features = ["json"] }
+
+# Jsonwebtoken: Manipulação de JWT
+jsonwebtoken = "9.0"
+
+# SQLx: ORM para Postgres
+sqlx = { version = "0.7", features = ["runtime-tokio-native-tls", "postgres"] }
+
+# Serde: Serialização e deserialização de JSON
+serde = { version = "1.0", features = ["derive"] }
+
+# Tokio: Runtime assíncrono para Axum e SQLx
+tokio = { version = "1.0", features = ["full"] }
+
+# Tracing: Logging estruturado
+tracing = "0.1"
+tracing-subscriber = {version="0.3", features=["env-filter"]}
+
+# Env_logger: Para carregar variáveis de ambiente e configurar logs
+dotenvy = "0.15"
+
+# Para hashing seguro de senhas
+argon2 = "0.5" 
+
+# Para geração de sal (salt)
+rand = "0.8" 
