@@ -18,5 +18,6 @@ task : {
 docker exec -it birradb mongosh
 
 use birradb;
+db.notes.find().pretty();
 db.users.find().pretty();
 db.tasks.find().pretty();
