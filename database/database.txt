@@ -1,0 +1,22 @@
+Estrutura dos documentos: 
+
+user : {
+    id : UUID, 
+    email : texto,
+    hashpw : texto hex, hash da senha
+}
+
+task : {
+    id : UUID, 
+    "title": texto,
+    "description": texto,
+    "completed": lógica (true/false),
+    "dueDate": "2023-11-05T18:00:00Z",
+    "owner" : UUID chave do documento "user"
+}
+
+docker exec -it birradb mongosh
+
+use birradb;
+db.users.find().pretty();
+db.tasks.find().pretty();
