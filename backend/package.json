@@ -2,11 +2,11 @@
     "name": "backend-nodejs-mongodb-express",
     "version": "1.0.0",
     "description": "Backend com Node.js, Express, MongoDB, JWT e hashing de senhas",
-    "main": "main.mjs",
+    "main": "app.mjs",
     "type": "module",
     "scripts": {
-      "start": "node main.mjs",
-      "dev": "nodemon main.mjs"
+      "start": "node app.mjs",
+      "dev": "nodemon app.mjs"
     },
     "author": "Cleuton Sampaio",
     "license": "MIT",
