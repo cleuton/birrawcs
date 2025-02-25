@@ -23,33 +23,47 @@ router.get('/tasks', async (req, res) => {
     const db = getDB();
     const tasksCollection = db.collection('tasks');
 
-    // 1. Busca as tarefas com status "pending" ou "working"
+    // 1. Busca as tasks com status "pending" ou "working"
     let tasks = await tasksCollection.find({
       owner: binaryUserId,
       status: { $in: ['pending', 'working'] }
     })
-      .sort({ dueDate: 1 }) // Ordem crescente por dueDate
+      .sort({ dueDate: -1 }) // Ordem decrescente de dueDate
       .project({ title: 1, status: 1, dueDate: 1, _id: 0 })
       .toArray();
 
-    if (tasks.length > 0) {
-      // Retorna as tarefas encontradas
-      return res.json({ tasks });
-    } else {
-      // 2. Se não houver tarefas "pending" ou "working", busca a última tarefa concluída
-      const completedTask = await tasksCollection.find({
+    // Se não houver tasks com status "pending" ou "working", retorna a última task "completed"
+    if (tasks.length === 0) {
+      tasks = await tasksCollection.find({
         owner: binaryUserId,
         status: 'completed'
       })
-        .sort({ dueDate: -1 }) // Ordena decrescentemente para obter a última tarefa concluída
-        .project({ dueDate: 1, status: 1, _id: 0 })
+        .sort({ dueDate: -1 })
+        .project({ title: 1, status: 1, dueDate: 1, _id: 0 })
         .limit(1)
         .toArray();
-
-      return res.json({ tasks: completedTask });
     }
+
+    // 2. Agrega os comments de todas as tasks do usuário com viewed false
+    // Inclui o id da task que contém cada comentário
+    const comments = await tasksCollection.aggregate([
+      { $match: { owner: binaryUserId } },
+      { $unwind: "$comments" },
+      { $match: { "comments.viewed": false } },
+      { $project: {
+          _id: 0,
+          taskId: "$id",
+          userName: "$comments.userName",
+          datePosted: "$comments.datePosted",
+          text: "$comments.text",
+          viewed: "$comments.viewed"
+      }},
+      { $sort: { datePosted: -1 } }
+    ]).toArray();
+
+    return res.json({ tasks, comments });
   } catch (err) {
-    console.error('Erro ao buscar tarefas:', err);
+    console.error('Erro ao buscar tasks e comments:', err);
     return res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
