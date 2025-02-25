@@ -12,3 +12,7 @@ An open-source WCS app, written in NodeJS and React, and using MongoDB
 9. E os testes: **Pendente**
 10. Listar todas as tarefas: **Pendente**
 11. Detalhe de uma tarefa: **Pendente**
+12. Comentar uma tarefa: **Pendente**
+13. Mudar status de uma tarefa: **Pendente**
+14. Crud tarefas: **Pendente**
+15. Crud usuários: **Pendente**
