@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import LoginForm from './components/LoginForm';
 import NotesList from './components/NotesList';
-import Summary from './components/Summary';
+import Dashboard from './components/Dashboard';
 import './App.css';
 
 function App() {
@@ -46,7 +46,7 @@ function App() {
     <div className="App">
       <h1>Bem-vindo ao BirraApp</h1>
       {isAuthenticated ? (
-        <Summary summary={summary} />
+        <Dashboard />
       ) : (
         <>
           <NotesList notes={notes} />

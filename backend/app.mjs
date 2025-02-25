@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import loginRoutes from './routes/login.mjs';
 import summaryRoutes from './routes/summary.mjs';
 import notesRoutes from './routes/notes.mjs';
+import tasksRoutes from './routes/tasks.mjs';
 
 // Importa a função de conexão com o DB
 import { connectDB } from './db.mjs';
@@ -19,6 +20,7 @@ app.use(cookieParser());
 app.use(loginRoutes);
 app.use(summaryRoutes);
 app.use(notesRoutes);
+app.use(tasksRoutes)
 
 connectDB().then(() => {
   app.listen(port, () => {
