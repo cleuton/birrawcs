@@ -1,13 +1,11 @@
 import express from 'express';
-import { getDB } from '../db.mjs';
+import { getNotes } from '../services/notesService.mjs';
 
 const router = express.Router();
 
 router.get('/notes', async (req, res) => {
   try {
-    const db = getDB();
-    const notesCollection = db.collection('notes');
-    const notes = await notesCollection.find({}).sort({ datePosted: -1 }).toArray();
+    const notes = await getNotes();
     return res.json({ notes });
   } catch (err) {
     console.error('Erro ao buscar notas:', err);
