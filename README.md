@@ -20,3 +20,13 @@ An open-source WCS app, written in NodeJS and React, and using MongoDB
 17. Mudar status de uma tarefa: **Pendente**
 18. Crud tarefas: **Pendente**
 19. Crud usuários: **Pendente**
+
+## Para executar os testes
+
+```shell
+cd backend 
+
+npm test
+
+npm run test:integration
+```
