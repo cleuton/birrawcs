@@ -1,7 +1,7 @@
 // Tasks.jsx
 import React from 'react';
 
-function Tasks({ tasks }) {
+function Tasks({ tasks, comments }) {
   return (
     <div>
       <h2>Tarefas</h2>
@@ -10,16 +10,8 @@ function Tasks({ tasks }) {
           <ul>
             {tasks.map((task, index) => (
               <li key={index}>
-                {task.title ? (
-                  <>
-                    <strong>{task.title}</strong> - {task.status} -{' '}
-                    {new Date(task.dueDate).toLocaleString('pt-BR')}
-                  </>
-                ) : (
-                  <>
-                    {new Date(task.dueDate).toLocaleString('pt-BR')} - {task.status}
-                  </>
-                )}
+                <strong>{task.title}</strong> - {task.status} -{' '}
+                {new Date(task.dueDate).toLocaleString('pt-BR')}
               </li>
             ))}
           </ul>
@@ -28,6 +20,21 @@ function Tasks({ tasks }) {
         )
       ) : (
         <p>Carregando tarefas...</p>
+      )}
+
+      {/* Exibe "Últimos comentários" somente se houver comentários */}
+      {comments && comments.length > 0 && (
+        <div>
+          <h2>Últimos comentários</h2>
+          <ul>
+            {comments.map((comment, index) => (
+              <li key={index}>
+                <strong>Task ID: {comment.taskId}</strong> - {comment.userName} -{' '}
+                {new Date(comment.datePosted).toLocaleString('pt-BR')} - {comment.text}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );

@@ -6,6 +6,7 @@ import Tasks from './Tasks';
 function Dashboard() {
   const [summary, setSummary] = useState(null);
   const [tasks, setTasks] = useState(null);
+  const [comments, setComments] = useState(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -18,10 +19,13 @@ function Dashboard() {
         setError('Erro ao buscar resumo');
       });
 
-    // Busca as tarefas (segundo a lógica definida no backend)
+    // Busca as tarefas e comentários (rota "/tasks" agora retorna ambos)
     fetch('/tasks', { credentials: 'include' })
       .then((res) => res.json())
-      .then((data) => setTasks(data.tasks))
+      .then((data) => {
+        setTasks(data.tasks);
+        setComments(data.comments);
+      })
       .catch((err) => {
         console.error('Erro ao buscar tarefas:', err);
         setError('Erro ao buscar tarefas');
@@ -32,7 +36,7 @@ function Dashboard() {
     <div>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <Summary summary={summary} />
-      <Tasks tasks={tasks} />
+      <Tasks tasks={tasks} comments={comments} />
     </div>
   );
 }
