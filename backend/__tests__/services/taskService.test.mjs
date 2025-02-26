@@ -24,119 +24,240 @@ describe('tasksService - getTasksAndComments', () => {
   const userIdBuffer = Buffer.from(fakeDecoded.id.replace(/-/g, ''), 'hex');
   const expectedBinaryUserId = new Binary(userIdBuffer, Binary.SUBTYPE_UUID);
 
+  let mockUsersCollection;
+  let mockTasksCollection;
+
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Mocks das collections
+    mockUsersCollection = {
+      findOne: jest.fn(), // vamos controlar se retorna admin: true ou false
+    };
+    mockTasksCollection = {
+      find: jest.fn(),
+      aggregate: jest.fn(),
+    };
+
+    // Mock do getDB para retornar as duas coleções
+    getDB.mockReturnValue({
+      collection: jest.fn((name) => {
+        if (name === 'users') return mockUsersCollection;
+        if (name === 'tasks') return mockTasksCollection;
+        return null;
+      }),
+    });
+
+    // Por padrão, o verifyToken devolve fakeDecoded
+    verifyToken.mockReturnValue(fakeDecoded);
   });
 
-  it('deve retornar tasks e comments quando tasks com status pending/working são encontradas', async () => {
-    verifyToken.mockReturnValue(fakeDecoded);
+  // =============== Cenário 1: Usuario NÃO-ADMIN com tasks pendentes/working ===============
+  it('não-admin: retorna tasks e comments quando tasks pending/working são encontradas', async () => {
+    // 1) Retorna um usuário com admin: false
+    mockUsersCollection.findOne.mockResolvedValueOnce({ admin: false });
 
-    // Fake tasks e comments para o cenário onde a primeira consulta retorna resultados
+    // 2) Fake tasks e comments
     const fakeTasks = [
       { title: 'Task 1', status: 'pending', dueDate: 200 },
       { title: 'Task 2', status: 'working', dueDate: 150 },
     ];
     const fakeComments = [
       { taskId: 'task1', userName: 'User A', datePosted: 300, text: 'Comment 1', viewed: false },
-      { taskId: 'task2', userName: 'User B', datePosted: 250, text: 'Comment 2', viewed: false },
     ];
 
-    // Cria uma fake collection com métodos encadeados
-    const fakeCollection = {
-      find: jest.fn().mockReturnValue({
-        sort: jest.fn().mockReturnThis(),
-        project: jest.fn().mockReturnThis(),
-        toArray: jest.fn().mockResolvedValue(fakeTasks),
-      }),
-      aggregate: jest.fn(() => ({
-        toArray: jest.fn().mockResolvedValue(fakeComments),
-      })),
-    };
-
-    getDB.mockReturnValue({
-      collection: jest.fn(() => fakeCollection),
+    // 3) Mock do find() pendente/working
+    mockTasksCollection.find.mockReturnValue({
+      sort: jest.fn().mockReturnThis(),
+      project: jest.fn().mockReturnThis(),
+      toArray: jest.fn().mockResolvedValue(fakeTasks),
     });
 
+    // 4) Mock do aggregate() => comments
+    mockTasksCollection.aggregate.mockReturnValue({
+      toArray: jest.fn().mockResolvedValue(fakeComments),
+    });
+
+    // 5) Executa
     const result = await getTasksAndComments(token);
+
+    // 6) Verifica se retornou corretamente
     expect(result).toEqual({ tasks: fakeTasks, comments: fakeComments });
 
-    // Verifica o filtro utilizado na consulta para tasks pending/working
-    expect(fakeCollection.find).toHaveBeenCalledWith({
+    // 7) Verifica que a query foi feita em owner (não-admin)
+    expect(mockTasksCollection.find).toHaveBeenCalledWith({
       owner: expectedBinaryUserId,
-      status: { $in: ['pending', 'working'] }
+      status: { $in: ['pending', 'working'] },
     });
 
-    // Verifica o pipeline de agregação de comments
-    const expectedPipeline = [
+    // 8) Verifica pipeline de comments
+    expect(mockTasksCollection.aggregate).toHaveBeenCalledWith([
       { $match: { owner: expectedBinaryUserId } },
       { $unwind: "$comments" },
       { $match: { "comments.viewed": false } },
-      { $project: {
+      {
+        $project: {
           _id: 0,
           taskId: "$id",
           userName: "$comments.userName",
           datePosted: "$comments.datePosted",
           text: "$comments.text",
-          viewed: "$comments.viewed"
-      }},
-      { $sort: { datePosted: -1 } }
-    ];
-    expect(fakeCollection.aggregate).toHaveBeenCalledWith(expectedPipeline);
+          viewed: "$comments.viewed",
+        },
+      },
+      { $sort: { datePosted: -1 } },
+    ]);
   });
 
-  it('deve buscar tasks "completed" se não houver tasks pending/working', async () => {
-    verifyToken.mockReturnValue(fakeDecoded);
+  // =============== Cenário 2: Usuario NÃO-ADMIN sem tasks pendentes => pega completed ===============
+  it('não-admin: busca tasks "completed" se não houver tasks pending/working', async () => {
+    // 1) Retorna um usuário com admin: false
+    mockUsersCollection.findOne.mockResolvedValueOnce({ admin: false });
 
-    // Simula que a primeira consulta não encontrou tasks
+    // 2) Primeira consulta sem tasks
     const emptyTasks = [];
-    // Simula que a segunda consulta retorna uma task "completed"
+    // Segunda consulta com completed
     const completedTask = [{ title: 'Completed Task', status: 'completed', dueDate: 100 }];
-    const fakeComments = []; // Sem comentários para este cenário
+    const fakeComments = [];
 
-    // Cria dois mocks encadeados:
-    // Primeiro para a consulta de tasks com status "pending" ou "working"
+    // 3) Mock encadeado
     const chainPending = {
       sort: jest.fn().mockReturnThis(),
       project: jest.fn().mockReturnThis(),
       toArray: jest.fn().mockResolvedValueOnce(emptyTasks),
     };
-
-    // Segundo para a consulta de tasks com status "completed"
     const chainCompleted = {
       sort: jest.fn().mockReturnThis(),
       project: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(), // simula o método limit
+      limit: jest.fn().mockReturnThis(),
       toArray: jest.fn().mockResolvedValueOnce(completedTask),
     };
 
-    // Simula o método find para retornar, na primeira chamada, chainPending e, na segunda, chainCompleted
     let findCallCount = 0;
-    const fakeCollection = {
-      find: jest.fn(() => {
-        findCallCount++;
-        return findCallCount === 1 ? chainPending : chainCompleted;
-      }),
-      aggregate: jest.fn(() => ({
-        toArray: jest.fn().mockResolvedValue(fakeComments),
-      })),
-    };
+    mockTasksCollection.find.mockImplementation(() => {
+      findCallCount++;
+      return findCallCount === 1 ? chainPending : chainCompleted;
+    });
 
-    getDB.mockReturnValue({
-      collection: jest.fn(() => fakeCollection),
+    mockTasksCollection.aggregate.mockReturnValue({
+      toArray: jest.fn().mockResolvedValue(fakeComments),
     });
 
     const result = await getTasksAndComments(token);
     expect(result).toEqual({ tasks: completedTask, comments: fakeComments });
 
-    // Verifica que a primeira chamada do find utiliza o filtro pending/working
-    expect(fakeCollection.find).toHaveBeenNthCalledWith(1, {
+    // Verifica consultas
+    expect(mockTasksCollection.find).toHaveBeenNthCalledWith(1, {
       owner: expectedBinaryUserId,
-      status: { $in: ['pending', 'working'] }
+      status: { $in: ['pending', 'working'] },
     });
-    // E a segunda chamada utiliza o filtro completed
-    expect(fakeCollection.find).toHaveBeenNthCalledWith(2, {
+    expect(mockTasksCollection.find).toHaveBeenNthCalledWith(2, {
       owner: expectedBinaryUserId,
-      status: 'completed'
+      status: 'completed',
+    });
+  });
+
+  // =============== Cenário 3: Usuario ADMIN com tasks pendentes/working ===============
+  it('admin: retorna tasks e comments quando tasks pending/working são encontradas (usa requester)', async () => {
+    // 1) Retorna userDoc com admin: true
+    mockUsersCollection.findOne.mockResolvedValueOnce({ admin: true });
+
+    // 2) Fake tasks e comments
+    const fakeTasks = [
+      { title: 'Admin Task 1', status: 'pending', dueDate: 300 },
+      { title: 'Admin Task 2', status: 'working', dueDate: 200 },
+    ];
+    const fakeComments = [
+      { taskId: 'taskAdmin1', userName: 'User A', datePosted: 500, text: 'Comment X', viewed: false },
+    ];
+
+    // 3) Mock find => tasks
+    mockTasksCollection.find.mockReturnValue({
+      sort: jest.fn().mockReturnThis(),
+      project: jest.fn().mockReturnThis(),
+      toArray: jest.fn().mockResolvedValue(fakeTasks),
+    });
+
+    // 4) Mock aggregate => comments
+    mockTasksCollection.aggregate.mockReturnValue({
+      toArray: jest.fn().mockResolvedValue(fakeComments),
+    });
+
+    // 5) Executa
+    const result = await getTasksAndComments(token);
+
+    // 6) Verifica resultado
+    expect(result).toEqual({ tasks: fakeTasks, comments: fakeComments });
+
+    // 7) Verifica que a query foi feita em requester
+    expect(mockTasksCollection.find).toHaveBeenCalledWith({
+      requester: expectedBinaryUserId,
+      status: { $in: ['pending', 'working'] },
+    });
+
+    // 8) Verifica pipeline de comments => requester
+    expect(mockTasksCollection.aggregate).toHaveBeenCalledWith([
+      { $match: { requester: expectedBinaryUserId } },
+      { $unwind: "$comments" },
+      { $match: { "comments.viewed": false } },
+      {
+        $project: {
+          _id: 0,
+          taskId: "$id",
+          userName: "$comments.userName",
+          datePosted: "$comments.datePosted",
+          text: "$comments.text",
+          viewed: "$comments.viewed",
+        },
+      },
+      { $sort: { datePosted: -1 } },
+    ]);
+  });
+
+  // =============== Cenário 4 (opcional): Usuario ADMIN sem tasks pendentes => pega última ===============
+  it('admin: se não houver tasks pending/working, pega a última task cadastrada', async () => {
+    mockUsersCollection.findOne.mockResolvedValueOnce({ admin: true });
+
+    // Primeira consulta sem tasks
+    const emptyTasks = [];
+    // Segunda consulta sem filtrar status => pega apenas 1
+    const lastTask = [{ title: 'Admin Last Task', status: 'completed', dueDate: 50 }];
+    const fakeComments = [];
+
+    const chainPending = {
+      sort: jest.fn().mockReturnThis(),
+      project: jest.fn().mockReturnThis(),
+      toArray: jest.fn().mockResolvedValueOnce(emptyTasks),
+    };
+    const chainLast = {
+      sort: jest.fn().mockReturnThis(),
+      project: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      toArray: jest.fn().mockResolvedValueOnce(lastTask),
+    };
+
+    let findCallCount = 0;
+    mockTasksCollection.find.mockImplementation(() => {
+      findCallCount++;
+      return findCallCount === 1 ? chainPending : chainLast;
+    });
+
+    mockTasksCollection.aggregate.mockReturnValue({
+      toArray: jest.fn().mockResolvedValue(fakeComments),
+    });
+
+    const result = await getTasksAndComments(token);
+    expect(result).toEqual({ tasks: lastTask, comments: fakeComments });
+
+    // Verifica consultas
+    // 1ª => tasks pendentes/working
+    expect(mockTasksCollection.find).toHaveBeenNthCalledWith(1, {
+      requester: expectedBinaryUserId,
+      status: { $in: ['pending', 'working'] },
+    });
+    // 2ª => qualquer status
+    expect(mockTasksCollection.find).toHaveBeenNthCalledWith(2, {
+      requester: expectedBinaryUserId,
     });
   });
 });

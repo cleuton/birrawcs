@@ -74,14 +74,16 @@ db.users.insertMany([
     email: "user1@example.com",
     name: "Usuário 1",
     // Hash da senha "senha1"
-    hashpw: "$2b$10$sOW2i3nBT8ebmcNyjS6JReo0YxNhgEK.d7V6KPpRdxyz9Ez0.dBzy"
+    hashpw: "$2b$10$sOW2i3nBT8ebmcNyjS6JReo0YxNhgEK.d7V6KPpRdxyz9Ez0.dBzy",
+    admin: true
   },
   {
     id: UUID("22222222-2222-2222-2222-222222222222"),
     email: "user2@example.com",
     name: "Usuário 2",
     // Hash da senha "senha2"
-    hashpw: "$2b$10$xZqaTLxwQWAG3D3vKQ9ZLerRRSOgGDFu5Fvpdp/zgrrB6Q6WVL/q6"
+    hashpw: "$2b$10$xZqaTLxwQWAG3D3vKQ9ZLerRRSOgGDFu5Fvpdp/zgrrB6Q6WVL/q6",
+    admin: false
   }
 ]);
 
@@ -90,11 +92,12 @@ db.tasks.insertMany([
     id: UUID("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
     title: "Primeira Tarefa",
     description: "Descrição da primeira tarefa",
-    status: "pending",
+    status: "completed",
     dueDate: ISODate("2023-11-05T18:00:00Z"),
-    requester: UUID("22222222-2222-2222-2222-222222222222"),
-    owner: UUID("11111111-1111-1111-1111-111111111111"),
-    comments: [] // Inicialmente, sem comentários
+    requester: UUID("11111111-1111-1111-1111-111111111111"),
+    owner: UUID("22222222-2222-2222-2222-222222222222"),
+    attachment: "",
+    comments: [] 
   },
   {
     id: UUID("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
@@ -104,6 +107,7 @@ db.tasks.insertMany([
     dueDate: ISODate("2025-02-28T18:00:00Z"),
     requester: UUID("11111111-1111-1111-1111-111111111111"),
     owner: UUID("22222222-2222-2222-2222-222222222222"),
+    attachment: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb-arquivo.pdf",
     comments: [{"userName": "Usuário 1", "datePosted": ISODate("2025-02-05T10:00:00Z")
       , "text": "Lembre-se de atualizar o database!", "viewed": false}] 
   }

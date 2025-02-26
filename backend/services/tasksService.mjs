@@ -3,50 +3,93 @@ import { verifyToken } from './authService.mjs';
 import { Binary } from 'mongodb';
 
 export async function getTasksAndComments(token) {
+  // 1. Decodifica o token para obter userId (string)
   const decoded = verifyToken(token);
   const userIdString = decoded.id;
 
-  // Converte o ID do usuário para Binary (UUID)
+  // 2. Converte a string em Binary (UUID)
   const userIdBuffer = Buffer.from(userIdString.replace(/-/g, ''), 'hex');
   const binaryUserId = new Binary(userIdBuffer, Binary.SUBTYPE_UUID);
 
+  // 3. Acessa o banco/coleções
   const db = getDB();
+  const usersCollection = db.collection('users');
   const tasksCollection = db.collection('tasks');
 
-  // 1. Busca tasks com status "pending" ou "working"
-  let tasks = await tasksCollection.find({
-    owner: binaryUserId,
-    status: { $in: ['pending', 'working'] }
-  })
+  // 4. Verifica se é admin (userDoc.admin === true)
+  const userDoc = await usersCollection.findOne({ id: binaryUserId });
+  const isAdmin = userDoc?.admin === true;
+
+  let tasks;
+
+  // ============= LÓGICA PARA ADMIN =============
+  if (isAdmin) {
+    // Admin é o "requester" das tarefas
+    tasks = await tasksCollection.find({
+      requester: binaryUserId, // <--- important
+      status: { $in: ['pending', 'working'] }
+    })
     .sort({ dueDate: -1 })
     .project({ title: 1, status: 1, dueDate: 1, _id: 0 })
     .toArray();
 
-  // Se não encontrar, busca a última task "completed"
-  if (tasks.length === 0) {
-    tasks = await tasksCollection.find({
-      owner: binaryUserId,
-      status: 'completed'
-    })
+    // Se não encontrar tasks 'pending' ou 'working',
+    // pega apenas a última (qualquer status).
+    if (tasks.length === 0) {
+      tasks = await tasksCollection.find({
+        requester: binaryUserId
+      })
       .sort({ dueDate: -1 })
       .project({ title: 1, status: 1, dueDate: 1, _id: 0 })
       .limit(1)
       .toArray();
+    }
+
+  // ============= LÓGICA PARA NÃO-ADMIN =============
+  } else {
+    // Usuário não-admin é o "owner" das tarefas
+    tasks = await tasksCollection.find({
+      owner: binaryUserId, 
+      status: { $in: ['pending', 'working'] }
+    })
+    .sort({ dueDate: -1 })
+    .project({ title: 1, status: 1, dueDate: 1, _id: 0 })
+    .toArray();
+
+    // Se não encontrar, busca a última com status "completed"
+    if (tasks.length === 0) {
+      tasks = await tasksCollection.find({
+        owner: binaryUserId,
+        status: 'completed'
+      })
+      .sort({ dueDate: -1 })
+      .project({ title: 1, status: 1, dueDate: 1, _id: 0 })
+      .limit(1)
+      .toArray();
+    }
   }
 
-  // 2. Agrega os comments das tasks do usuário com viewed false
+  // 5. Comentários não lidos (viewed = false):
+  // Se o usuário é admin, a tarefa tem "requester: userId";
+  // se não, a tarefa tem "owner: userId".
+  const matchField = isAdmin
+    ? { requester: binaryUserId }
+    : { owner: binaryUserId };
+
   const comments = await tasksCollection.aggregate([
-    { $match: { owner: binaryUserId } },
+    { $match: matchField },
     { $unwind: "$comments" },
     { $match: { "comments.viewed": false } },
-    { $project: {
+    {
+      $project: {
         _id: 0,
         taskId: "$id",
         userName: "$comments.userName",
         datePosted: "$comments.datePosted",
         text: "$comments.text",
         viewed: "$comments.viewed"
-    }},
+      }
+    },
     { $sort: { datePosted: -1 } }
   ]).toArray();
 
