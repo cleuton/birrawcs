@@ -5,6 +5,7 @@ import { getDB } from '../db.mjs';
 const SECRET = 'seu_segredo_super_secreto';
 
 export async function login(email, password) {
+
   const db = getDB();
   const usersCollection = db.collection('users');
 

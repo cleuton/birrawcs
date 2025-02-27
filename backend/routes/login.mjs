@@ -12,6 +12,7 @@ router.post('/login', async (req, res) => {
       httpOnly: true,
       maxAge: 15 * 60 * 1000,
     });
+
     return res.json({ message: 'Login realizado com sucesso' });
   } catch (err) {
     console.error('Erro no login:', err);

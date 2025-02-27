@@ -8,6 +8,7 @@ import loginRouter from '../../routes/login.mjs';
 import notesRouter from '../../routes/notes.mjs';
 import summaryRouter from '../../routes/summary.mjs';
 import tasksRouter from '../../routes/tasks.mjs';
+import taskListRouter from '../../routes/taskList.mjs'; 
 
 const app = express();
 app.use(express.json());
@@ -17,6 +18,7 @@ app.use('/', loginRouter);
 app.use('/', notesRouter);
 app.use('/', summaryRouter);
 app.use('/', tasksRouter);
+app.use('/', taskListRouter); // Use a nova rota
 
 let server;
 const openSockets = new Set();
@@ -69,6 +71,7 @@ describe('Integração - API REST', () => {
       const res = await request(server)
         .post('/login')
         .send(validUser);
+      
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty('message', 'Login realizado com sucesso');
       expect(res.headers['set-cookie']).toBeDefined();
@@ -96,7 +99,7 @@ describe('Integração - API REST', () => {
         .post('/login')
         .send(validUser);
       const cookies = loginRes.headers['set-cookie'];
-      expect(cookies).toBeDefined();
+      expect(cookies).toBeDefined();     
 
       const res = await request(server)
         .get('/summary')
@@ -118,7 +121,7 @@ describe('Integração - API REST', () => {
         .post('/login')
         .send(validUser);
       const cookies = loginRes.headers['set-cookie'];
-      expect(cookies).toBeDefined();
+      expect(cookies).toBeDefined();  
 
       const res = await request(server)
         .get('/tasks')
@@ -126,6 +129,62 @@ describe('Integração - API REST', () => {
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty('tasks');
       expect(res.body).toHaveProperty('comments');
+    });
+  });
+
+  describe('GET /tasklist', () => {
+    it('deve retornar 401 se o token não for fornecido', async () => {
+      const res = await request(server).get('/tasklist');
+      expect(res.status).toBe(401);
+      expect(res.body).toHaveProperty('error', 'Acesso não autorizado');
+    });
+
+    it('deve retornar tasks filtradas por status se o token for válido', async () => {
+
+      const validUser = {
+        email: 'user2@example.com',
+        password: 'senha2',
+      };
+
+      const loginRes = await request(server)
+        .post('/login')
+        .send(validUser);
+
+       
+      const cookies = loginRes.headers['set-cookie'];
+      expect(cookies).toBeDefined();
+
+      const res = await request(server)
+        .get('/tasklist')
+        .query({ status: 'working' })
+        .set('Cookie', cookies);
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty('tasks');
+      expect(Array.isArray(res.body.tasks)).toBe(true);
+      expect(res.body.tasks.length).toBeGreaterThan(0);
+      expect(res.body.tasks[0]).toHaveProperty('status', 'working');
+    });
+
+    it('deve retornar tasks paginadas se o token for válido', async () => {
+
+      const validUser = {
+        email: 'user2@example.com',
+        password: 'senha2',
+      };
+
+      const loginRes = await request(server)
+        .post('/login')
+        .send(validUser);
+      const cookies = loginRes.headers['set-cookie'];
+      expect(cookies).toBeDefined();
+      const res = await request(server)
+        .get('/tasklist')
+        .query({ page: 1, pageSize: 1 })
+        .set('Cookie', cookies);
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty('tasks');
+      expect(Array.isArray(res.body.tasks)).toBe(true);
+      expect(res.body.tasks.length).toBe(1);
     });
   });
 });

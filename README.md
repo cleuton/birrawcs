@@ -13,8 +13,8 @@ An open-source WCS app, written in NodeJS and React, and using MongoDB
 10. Anexos na tarefa: Ok
 11. Incluir o atributo "admin" no "user". Só admins podem criar tarefas: Ok
 12. Se o "user" for "admin", aparecem todas as tarefas que ele cadastrou após o login, em ordem decrescente de "dueDate". Só aquelas que estão com status "pending" ou "working". Se o user não for admin, só aparecem as dele (owner). Ok
-13. Listar todas as tarefas: **Pendente**
-14. Na listagem de tarefas, elas devem vir em ordem decrescente de "dueDate" e deve ser possível selecionar o status: "todas" ou aquelas com algum status especial. **Pendente**
+13. Listar todas as tarefas: Ok
+14. Na listagem de tarefas, elas devem vir em ordem decrescente de "dueDate" e deve ser possível selecionar o status: "todas" ou aquelas com algum status especial. Ok
 15. Detalhe de uma tarefa: **Pendente**
 16. Comentar uma tarefa: **Pendente**
 17. Mudar status de uma tarefa: **Pendente**
