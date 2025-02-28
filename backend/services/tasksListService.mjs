@@ -9,7 +9,6 @@ export async function getTasks(token, statusFilter, page = 1, pageSize = 10) {
 
   // Verifica o token e obtém o ID do usuário
   const decoded = verifyToken(token);
-
   const userId = decoded.id;
 
   // Converte a string em Binary (UUID)
@@ -34,7 +33,9 @@ export async function getTasks(token, statusFilter, page = 1, pageSize = 10) {
     ...statusQuery
   };
 
-console.log(">>> query", JSON.stringify(query));  
+  // Calcula o total de registros para paginação
+  const total = await tasksCollection.countDocuments(query);
+  const totalPages = Math.ceil(total / pageSize);
 
   // Constrói a projeção para obter os campos desejados
   const projection = {
@@ -52,8 +53,6 @@ console.log(">>> query", JSON.stringify(query));
     .skip((page - 1) * pageSize)
     .limit(parseInt(pageSize))
     .toArray();
-
-    console.log(">>> tasks", JSON.stringify(tasks, null, 2));
 
   // Obtém os nomes dos usuários requisitantes e proprietários
   const userIds = tasks.flatMap(task => [task.requester, task.owner]);
@@ -74,5 +73,8 @@ console.log(">>> query", JSON.stringify(query));
     ownedBy: usersMap[task.owner.toString()]
   }));
 
-  return resultTasks;
+  return {
+    tasks: resultTasks,
+    totalPages: totalPages
+  };
 }

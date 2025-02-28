@@ -2,26 +2,24 @@ import React, { useState, useEffect } from 'react';
 
 function TaskList() {
   const [tasks, setTasks] = useState([]);
-  const [status, setStatus] = useState('working'); // status padrão
+  const [status, setStatus] = useState('working');
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState('');
   const pageSize = 10;
 
   const fetchTasks = () => {
+    setError(''); // Limpa erro anterior
     fetch(`/tasklist?status=${status}&page=${page}&pageSize=${pageSize}`, {
       credentials: 'include'
     })
       .then((response) => {
-        if (!response.ok) {
-          throw new Error('Erro ao buscar tarefas');
-        }
+        if (!response.ok) throw new Error('Erro ao buscar tarefas');
         return response.json();
       })
       .then((data) => {
-        setTasks(data.tasks);
-        // Se o número de tarefas for igual ao pageSize, pode haver uma próxima página
-        setHasMore(data.tasks.length === pageSize);
+        setTasks(Array.isArray(data.tasks.tasks) ? data.tasks.tasks : []); // Ensure tasks is an array
+        setTotalPages(data.tasks.totalPages); // Adjusted to match the provided JSON structure
       })
       .catch((err) => {
         setError(err.message);
@@ -34,12 +32,37 @@ function TaskList() {
 
   const handleStatusChange = (e) => {
     setStatus(e.target.value);
-    setPage(1); // reseta a página ao mudar o status
+    setPage(1); // Reseta página ao mudar status
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+    }
   };
 
   return (
     <div>
       <h2>Listar Tarefas</h2>
+      
+      {/* Controles de paginação */}
+      <div style={{ marginBottom: '20px' }}>
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map(num => (
+          <button
+            key={num}
+            onClick={() => handlePageChange(num)}
+            disabled={num === page}
+            style={{
+              margin: '0 5px',
+              fontWeight: num === page ? 'bold' : 'normal',
+              cursor: num === page ? 'default' : 'pointer'
+            }}
+          >
+            {num}
+          </button>
+        ))}
+      </div>
+
       <label htmlFor="status-select">Status:</label>
       <select id="status-select" value={status} onChange={handleStatusChange}>
         <option value="working">Trabalhando</option>
@@ -47,21 +70,33 @@ function TaskList() {
         <option value="pending">Pendente</option>
         <option value="suspended">Suspensa</option>
       </select>
+
       {error && <p style={{ color: 'red' }}>{error}</p>}
+      
       <ul>
         {tasks.map((task, index) => (
           <li key={index}>
             <strong>{task.title}</strong> - {task.status} - Prazo: {new Date(task.dueDate).toLocaleString()}
+            <br />
+            Solicitado por: {task.requestedBy} | Responsável: {task.ownedBy}
           </li>
         ))}
       </ul>
+
       <div>
-        {page > 1 && (
-          <button onClick={() => setPage(page - 1)}>Página Anterior</button>
-        )}
-        {hasMore && (
-          <button onClick={() => setPage(page + 1)}>Próxima Página</button>
-        )}
+        <button
+          onClick={() => handlePageChange(page - 1)}
+          disabled={page === 1}
+        >
+          Página Anterior
+        </button>
+        
+        <button
+          onClick={() => handlePageChange(page + 1)}
+          disabled={page >= totalPages}
+        >
+          Próxima Página
+        </button>
       </div>
     </div>
   );

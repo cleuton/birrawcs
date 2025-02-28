@@ -84,7 +84,23 @@ db.users.insertMany([
     // Hash da senha "senha2"
     hashpw: "$2b$10$xZqaTLxwQWAG3D3vKQ9ZLerRRSOgGDFu5Fvpdp/zgrrB6Q6WVL/q6",
     admin: false
-  }
+  },
+  {
+    id: UUID("33333333-3333-3333-3333-333333333333"),
+    email: "user3@example.com",
+    name: "Usuário 3",
+    // Hash da senha "senha3"
+    hashpw: "$2b$10$47Kd/qVt7.xCP4Wt0Y7OpegSzL9ebTEA9ckUfooBAs7Y3Jrd4yQiC",
+    admin: false
+  },
+  {
+    id: UUID("44444444-4444-4444-4444-444444444444"),
+    email: "user4@example.com",
+    name: "Usuário 4",
+    // Hash da senha "senha4"
+    hashpw: "$2b$10$xmeXOiW/Pko3MSmH2uGnoe8YgkCXovjQuJX6U6L/opJePkxU6xWji",
+    admin: false
+  }      
 ]);
 
 db.tasks.insertMany([
@@ -112,3 +128,32 @@ db.tasks.insertMany([
       , "text": "Lembre-se de atualizar o database!", "viewed": false}] 
   }
 ]);
+
+// Tarefas extras para testes de paginação
+
+for (let i = 0; i < 60; i++) {
+  const comments = [];
+  const numComments = Math.floor(Math.random() * 4); // Random number between 0 and 3
+  for (let j = 0; j < numComments; j++) {
+    comments.push({
+      userName: `Usuário ${Math.floor(Math.random() * 4) + 1}`,
+      datePosted: new Date(),
+      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.".substring(0, 50),
+      viewed: Math.random() < 0.5
+    });
+  }
+
+  db.tasks.insertOne({
+    id: UUID(),
+    title: `Tarefa ${i}`,
+    description: `Descrição da tarefa ${i}`,
+    status: i % 2 === 0 ? "pending" : "working",
+    dueDate: new Date(),
+    requester: UUID("11111111-1111-1111-1111-111111111111"),
+    owner: i % 2 === 0 ? UUID("33333333-3333-3333-3333-333333333333") : UUID("44444444-4444-4444-4444-444444444444"),
+    attachment: "",
+    comments: comments
+  });
+}
+// Fim da inicialização
+

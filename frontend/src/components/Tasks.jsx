@@ -8,7 +8,7 @@ function Tasks({ tasks, comments }) {
       {tasks ? (
         tasks.length > 0 ? (
           <ul>
-            {tasks.map((task, index) => (
+            {tasks.slice(0, 5).map((task, index) => (
               <li key={index}>
                 <strong>{task.title}</strong> - {task.status} -{' '}
                 {new Date(task.dueDate).toLocaleString('pt-BR')}
@@ -27,7 +27,7 @@ function Tasks({ tasks, comments }) {
         <div>
           <h2>Últimos comentários</h2>
           <ul>
-            {comments.map((comment, index) => (
+            {comments.slice(0, 5).map((comment, index) => (
               <li key={index}>
                 <strong>Task ID: {comment.taskId}</strong> - {comment.userName} -{' '}
                 {new Date(comment.datePosted).toLocaleString('pt-BR')} - {comment.text}
