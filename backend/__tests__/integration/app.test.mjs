@@ -9,6 +9,7 @@ import notesRouter from '../../routes/notes.mjs';
 import summaryRouter from '../../routes/summary.mjs';
 import tasksRouter from '../../routes/tasks.mjs';
 import taskListRouter from '../../routes/taskList.mjs'; 
+import taskCrudRoutes from '../../routes/taskCrud.mjs';
 
 const app = express();
 app.use(express.json());
@@ -18,7 +19,9 @@ app.use('/', loginRouter);
 app.use('/', notesRouter);
 app.use('/', summaryRouter);
 app.use('/', tasksRouter);
-app.use('/', taskListRouter); // Use a nova rota
+app.use('/', taskListRouter); 
+app.use('/', taskCrudRoutes);
+
 
 let server;
 const openSockets = new Set();
@@ -160,9 +163,9 @@ describe('Integração - API REST', () => {
         .set('Cookie', cookies);
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty('tasks');
-      expect(Array.isArray(res.body.tasks)).toBe(true);
-      expect(res.body.tasks.length).toBeGreaterThan(0);
-      expect(res.body.tasks[0]).toHaveProperty('status', 'working');
+      expect(Array.isArray(res.body.tasks.tasks)).toBe(true);
+      expect(res.body.tasks.tasks.length).toBeGreaterThan(0);
+      expect(res.body.tasks.tasks[0]).toHaveProperty('status', 'working');
     });
 
     it('deve retornar tasks paginadas se o token for válido', async () => {
@@ -183,8 +186,110 @@ describe('Integração - API REST', () => {
         .set('Cookie', cookies);
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty('tasks');
-      expect(Array.isArray(res.body.tasks)).toBe(true);
-      expect(res.body.tasks.length).toBe(1);
+      expect(Array.isArray(res.body.tasks.tasks)).toBe(true);
+      expect(res.body.tasks.tasks.length).toBe(1);
+    });
+  });
+  // Tarefas
+
+  describe('CRUD de Tarefas', () => {
+    let userToken;
+    let adminToken;
+    let taskIdTeste;
+  
+    beforeAll(async () => {
+      // Autenticação do usuário regular (user2)
+      const userRes = await request(server)
+        .post('/login')
+        .send(validUser);
+      userToken = userRes.headers['set-cookie'];
+  
+      // Autenticação do admin (user1)
+      const adminRes = await request(server)
+        .post('/login')
+        .send({ email: 'user1@example.com', password: 'senha1' });
+      adminToken = adminRes.headers['set-cookie'];
+    });
+  
+    it('POST /task - deve criar tarefa com dados válidos', async () => {
+      const novaTarefa = {
+        title: 'Tarefa Teste',
+        description: 'Descrição da tarefa de teste',
+        status: 'pending',
+        dueDate: new Date().toISOString(),
+        owner: '22222222-2222-2222-2222-222222222222',
+      };
+  
+      const res = await request(server)
+        .post('/task')
+        .set('Cookie', userToken)
+        .send(novaTarefa)
+        .expect(201);
+  
+      taskIdTeste = res.body.id; // Agora é uma string UUID válida
+      expect(res.body.title).toBe(novaTarefa.title);
+      expect(res.body.status).toBe(novaTarefa.status);
+    });
+  
+    it('GET /task/:id - deve retornar tarefa existente', async () => {
+      const res = await request(server)
+        .get(`/task/${taskIdTeste}`) // Usa UUID string
+        .set('Cookie', userToken)
+        .expect(200);
+  
+      expect(res.body.title).toBe('Tarefa Teste');
+      expect(res.body.owner).toBeDefined();
+    });
+  
+    it('PUT /task/:id - deve atualizar tarefa', async () => {
+      const dadosAtualizacao = { status: 'completed' };
+      const res = await request(server)
+        .put(`/task/${taskIdTeste}`)
+        .set('Cookie', userToken)
+        .send(dadosAtualizacao)
+        .expect(200);
+  
+      expect(res.body.status).toBe('completed');
+    });
+  
+    it('DELETE /task/:id - deve excluir tarefa', async () => {
+      await request(server)
+        .delete(`/task/${taskIdTeste}`)
+        .set('Cookie', userToken)
+        .expect(204);
+  
+      await request(server)
+        .get(`/task/${taskIdTeste}`)
+        .set('Cookie', userToken)
+        .expect(404);
+    });
+  
+    it('PUT /task/:id - deve negar acesso a não proprietário', async () => {
+      // Cria tarefa como user2
+      const tempTask = {
+        title: 'Tarefa Temporária',
+        description: 'Tarefa para teste de permissão',
+        status: 'pending',
+        dueDate: new Date().toISOString(),
+        owner: '22222222-2222-2222-2222-222222222222',
+      };
+  
+      const { body } = await request(server)
+        .post('/task')
+        .set('Cookie', userToken)
+        .send(tempTask)
+        .expect(201);
+  
+      // Tenta atualizar como admin (user1)
+console.log("&&&&&& body", JSON.stringify(body));
+      const res = await request(server)
+        .put(`/task/${body.id}`) // ID como string UUID
+        .set('Cookie', adminToken)
+        .send({ status: 'completed' })
+        .expect(404); // Agora retorna 404 (tarefa não encontrada para o admin)
+  
+      expect(res.body.error).toBe('Tarefa não encontrada');
     });
   });
 });
+
