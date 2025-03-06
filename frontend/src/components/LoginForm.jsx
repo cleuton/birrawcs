@@ -1,8 +1,11 @@
+// LoginForm.jsx
 import React, { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
-function LoginForm({ onLoginSuccess, setError }) {
+function LoginForm({ setError, onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { refreshUser } = useAuth(); // Recupera a função para atualizar os dados do usuário
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -15,7 +18,10 @@ function LoginForm({ onLoginSuccess, setError }) {
         body: JSON.stringify({ email, password })
       });
       if (response.ok) {
-        onLoginSuccess();
+        // Após o login, atualiza o contexto buscando os dados do usuário
+        await refreshUser();
+        // Opcionalmente, execute alguma ação adicional (como redirecionamento)
+        if (onLoginSuccess) onLoginSuccess();
       } else {
         const data = await response.json();
         setError(data.error || 'Erro no login');

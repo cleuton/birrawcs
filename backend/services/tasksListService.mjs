@@ -1,6 +1,7 @@
 import { getDB } from '../db.mjs';
 import { verifyToken } from './authService.mjs';
 import { Binary } from 'mongodb';
+import { uuidBinarioParaString } from './taskCrudService.mjs';
 
 export async function getTasks(token, statusFilter, page = 1, pageSize = 10) {
   const db = getDB();
@@ -22,7 +23,7 @@ export async function getTasks(token, statusFilter, page = 1, pageSize = 10) {
   }
 
   // Define o campo de filtro com base no tipo de usuário
-  const filterField = user.admin ? 'requester' : 'owner';
+  const filterField = user.admin  ? 'requester' : 'owner';
 
   // Constrói o filtro de status
   const statusQuery = statusFilter ? { status: statusFilter } : {};
@@ -39,6 +40,7 @@ export async function getTasks(token, statusFilter, page = 1, pageSize = 10) {
 
   // Constrói a projeção para obter os campos desejados
   const projection = {
+    id: 1,
     title: 1,
     status: 1,
     dueDate: 1,
@@ -66,6 +68,7 @@ export async function getTasks(token, statusFilter, page = 1, pageSize = 10) {
 
   // Mapeia os nomes dos usuários nas tarefas
   const resultTasks = tasks.map(task => ({
+    id: uuidBinarioParaString(task.id),
     title: task.title,
     status: task.status,
     dueDate: task.dueDate,

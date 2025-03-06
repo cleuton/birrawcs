@@ -21,3 +21,7 @@ use birradb;
 db.notes.find().pretty();
 db.users.find().pretty();
 db.tasks.find().pretty();
+
+db.tasks.find({
+  _id: ObjectId("67c9a62d5f4498dadb23d2da")
+});

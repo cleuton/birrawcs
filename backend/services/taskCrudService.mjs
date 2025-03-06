@@ -5,12 +5,12 @@ import { v4 as uuidv4 } from 'uuid';
 
 const gerarUuidString = () => uuidv4();
 
-const stringParaUuidBinario = (uuidString) => {
+export const stringParaUuidBinario = (uuidString) => {
   if (!uuidString) throw new Error('UUID inválido');
   return new Binary(Buffer.from(uuidString.replace(/-/g, ''), 'hex'), Binary.SUBTYPE_UUID);
 };
 
-const uuidBinarioParaString = (binaryUuid) => {
+export const uuidBinarioParaString = (binaryUuid) => {
   const buffer = binaryUuid.buffer;
   const hex = buffer.toString('hex');
   return `${hex.substr(0, 8)}-${hex.substr(8, 4)}-${hex.substr(12, 4)}-${hex.substr(16, 4)}-${hex.substr(20)}`;
@@ -85,9 +85,15 @@ export const obterTarefaPorId = async (idTarefa, token) => {
 export const atualizarTarefa = async (idTarefa, dadosAtualizacao, token) => {
   const decodificado = verifyToken(token);
   const idUsuario = decodificado.id;
+  const isAdmin = decodificado.role === 'admin'; 
 
   const db = getDB();
   const colecaoTarefas = db.collection('tasks');
+
+  // Permitir apenas admins alterarem o owner
+  if (!isAdmin) {
+    throw new Error('Apenas administradores podem alterar o responsável');
+  }
 
   const resultado = await colecaoTarefas.updateOne(
     { 

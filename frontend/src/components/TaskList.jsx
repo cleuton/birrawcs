@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 function TaskList() {
   const [tasks, setTasks] = useState([]);
@@ -20,6 +21,7 @@ function TaskList() {
       .then((data) => {
         setTasks(Array.isArray(data.tasks.tasks) ? data.tasks.tasks : []); // Ensure tasks is an array
         setTotalPages(data.tasks.totalPages); // Adjusted to match the provided JSON structure
+        console.log('Tarefas carregadas:', tasks); // Verifique se os IDs estão presentes
       })
       .catch((err) => {
         setError(err.message);
@@ -74,11 +76,12 @@ function TaskList() {
       {error && <p style={{ color: 'red' }}>{error}</p>}
       
       <ul>
-        {tasks.map((task, index) => (
-          <li key={index}>
-            <strong>{task.title}</strong> - {task.status} - Prazo: {new Date(task.dueDate).toLocaleString()}
-            <br />
-            Solicitado por: {task.requestedBy} | Responsável: {task.ownedBy}
+        {tasks.map((task) => (
+          <li key={task.id}>
+            <Link to={`/task/${task.id}`}>
+              {task.title} - {task.status}
+            </Link>
+            <span>&nbsp; Prazo: {new Date(task.dueDate).toLocaleString()}</span>
           </li>
         ))}
       </ul>

@@ -8,6 +8,7 @@ import notesRoutes from './routes/notes.mjs';
 import tasksRoutes from './routes/tasks.mjs';
 import taskListRoutes from './routes/taskList.mjs'; 
 import taskCrudRoutes from './routes/taskCrud.mjs';
+import userRoutes from './routes/user.mjs';
 
 // Importa a função de conexão com o DB
 import { connectDB } from './db.mjs';
@@ -25,6 +26,7 @@ app.use(notesRoutes);
 app.use(tasksRoutes);
 app.use(taskListRoutes); 
 app.use(taskCrudRoutes);
+app.use(userRoutes);
 
 connectDB().then(() => {
   app.listen(port, () => {

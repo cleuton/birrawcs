@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import LoginForm from './components/LoginForm';
 import NotesList from './components/NotesList';
 import Dashboard from './components/Dashboard';
 import TaskList from './components/TaskList';
+import TaskCrud from './components/TaskCrud';
+import { jwtDecode } from 'jwt-decode';
 import './App.css';
 
 function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [notes, setNotes] = useState([]);
   const [error, setError] = useState('');
+  const [userRole, setUserRole] = useState('');
   const navigate = useNavigate();
 
   // Se não estiver autenticado, busca as notas
@@ -31,8 +35,18 @@ function AppContent() {
   }, [isAuthenticated]);
 
   // Função chamada após login bem-sucedido
-  const handleLoginSuccess = () => {
-    setIsAuthenticated(true);
+  const handleLoginSuccess = async () => {
+    try {
+      const response = await fetch('/user', { credentials: 'include' });
+      if (!response.ok) throw new Error('Falha ao obter dados do usuário');
+      
+      const userData = await response.json();      
+      setUserRole(userData.role);
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.error('Erro ao decodificar token:', error);
+      // Trate o erro (ex: redirecione para login)
+    }
   };
 
   // Função para logout: limpa o cookie e redireciona para a home
@@ -49,31 +63,39 @@ function AppContent() {
       {isAuthenticated && (
         <nav>
           <ul>
+            {/* Dashboard */}
             <li>
               <Link to="/dashboard">Dashboard</Link>
             </li>
+
+            {/* Notas */}
             <li>
               <Link to="/notes">Notas</Link>
             </li>
-            <li>
+
+            {/* Tarefas com submenu condicional */}
+            <li className="nav-item">
               Tarefas
-              <ul>
+              <ul className="nav-submenu">
+                {/* Listar tarefas (visível para todos usuários autenticados) */}
                 <li>
-                  <Link to="/tarefas/listar">Listar</Link>
+                  <Link to="/tasks">Listar</Link>
                 </li>
+
+                {/* Criar tarefa (apenas para admins) */}
+                {userRole === 'admin' && (
+                  <li>
+                    <Link to="/task/new">Criar Tarefa</Link>
+                  </li>
+                )}
               </ul>
             </li>
+
+            {/* Botão de logout */}
             <li>
               <button
                 onClick={handleLogout}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  color: 'blue',
-                  textDecoration: 'underline',
-                  cursor: 'pointer'
-                }}
+                className="logout-button"
               >
                 Sair
               </button>
@@ -117,6 +139,9 @@ function AppContent() {
             )
           }
         />
+        <Route path="/task/new" element={<TaskCrud />} />
+        <Route path="/task/:id" element={<TaskCrud />} />
+        <Route path="/tasks" element={<TaskList />} />        
       </Routes>
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
@@ -127,7 +152,9 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <AppContent />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </Router>
   );
 }
