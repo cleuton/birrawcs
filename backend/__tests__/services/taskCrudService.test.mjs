@@ -164,19 +164,21 @@ describe('taskCrudService - CRUD de Tarefas', () => {
         status: 'completed',
         dueDate: new Date(),
         requester: expectedUserId,
+        description: 'Descrição da tarefa atualizada',
         owner: expectedUserId,
       };
 
       mockTasksCollection.updateOne.mockResolvedValue({ matchedCount: 1 });
       mockTasksCollection.findOne.mockResolvedValue(mockTask);
 
-      const resultado = await atualizarTarefa('d98d1422-eb85-46ee-ac28-3b66692cf180', { status: 'completed' }, token);
+      const resultado = await atualizarTarefa('d98d1422-eb85-46ee-ac28-3b66692cf180', 
+        mockTask, token);
 
       expect(mockTasksCollection.updateOne).toHaveBeenCalledWith(
         expect.objectContaining({
           id: expect.any(Binary)
         }),
-        { $set: { status: 'completed' } }
+        { $set: mockTask }
       );
 
       expect(resultado.status).toBe('completed');
@@ -187,7 +189,7 @@ describe('taskCrudService - CRUD de Tarefas', () => {
       verifyToken.mockReturnValue(fakeDecodedAdmin);
       mockTasksCollection.updateOne.mockResolvedValue({ matchedCount: 0 });
 
-      await expect(atualizarTarefa('invalid-id', {}, token)).rejects.toThrow('Falha ao atualizar a tarefa');
+      await expect(atualizarTarefa('invalid-id', {}, token)).rejects.toThrow('Os seguintes atributos obrigatórios estão faltando: title, description, status, dueDate, owner, requester');
     });
   });
 
@@ -213,7 +215,7 @@ describe('taskCrudService - CRUD de Tarefas', () => {
       verifyToken.mockReturnValue(fakeDecodedAdmin);      
       mockTasksCollection.deleteOne.mockResolvedValue({ deletedCount: 0 });
 
-      await expect(excluirTarefa('invalid-id', token)).rejects.toThrow('Falha ao excluir a tarefa');
+      await expect(excluirTarefa('invalid-id', token)).rejects.toThrow('Tarefa não encontrada');
     });
   });
 });

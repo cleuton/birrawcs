@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { getDB } from '../db.mjs';
+import logger from '../util/logger.mjs';
 
 const SECRET = 'seu_segredo_super_secreto';
 
@@ -10,11 +11,13 @@ export async function login(email, password) {
   const usersCollection = db.collection('users');
 
   if (!email || !password) {
+    logger.error('Email e senha são obrigatórios');
     throw new Error('Email e senha são obrigatórios');
   }
 
   const user = await usersCollection.findOne({ email });
   if (!user) {
+    logger.error('Credenciais inválidas');
     throw new Error('Credenciais inválidas');
   }
 
@@ -41,6 +44,7 @@ export function verifyToken(token) {
     const decoded = jwt.verify(token, SECRET);
     return decoded;
   } catch (err) {
+    logger.error('Token inválido');
     throw new Error('Token inválido');
   }
 }

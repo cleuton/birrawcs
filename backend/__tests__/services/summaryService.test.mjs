@@ -84,6 +84,6 @@ describe('summaryService - getSummary', () => {
     });
     verifyToken.mockReturnValue(validDecoded);
 
-    await expect(getSummary('validtoken')).rejects.toThrow('Aggregation error');
+    await expect(getSummary('validtoken')).rejects.toThrow('Erro ao buscar o resumo');
   });
 });

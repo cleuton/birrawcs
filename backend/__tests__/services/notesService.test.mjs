@@ -66,6 +66,6 @@ describe('notesService', () => {
     });
 
     // Verifica se a função rejeita com o erro esperado
-    await expect(getNotes()).rejects.toThrow('Erro no banco de dados');
+    await expect(getNotes()).rejects.toThrow('Erro ao buscar as notas');
   });
 });
