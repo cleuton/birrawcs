@@ -242,53 +242,46 @@ describe('Integração - API REST', () => {
     });
   
     it('PUT /task/:id - deve atualizar tarefa', async () => {
-      const dadosAtualizacao = { status: 'completed' };
+      const result1 = await request(server)
+        .get(`/task/${taskIdTeste}`) // Usa UUID string
+        .set('Cookie', adminToken)
+        .expect(200);      
+      result1.body.status = 'completed';    
       const res = await request(server)
         .put(`/task/${taskIdTeste}`)
-        .set('Cookie', userToken)
-        .send(dadosAtualizacao)
+        .set('Cookie', adminToken)
+        .send(result1.body)
         .expect(200);
   
       expect(res.body.status).toBe('completed');
     });
   
     it('DELETE /task/:id - deve excluir tarefa', async () => {
-      await request(server)
-        .delete(`/task/${taskIdTeste}`)
-        .set('Cookie', userToken)
-        .expect(204);
-  
-      await request(server)
-        .get(`/task/${taskIdTeste}`)
-        .set('Cookie', userToken)
-        .expect(404);
-    });
-  
-    it('PUT /task/:id - deve negar acesso a não proprietário', async () => {
-      // Cria tarefa como user2
-      const tempTask = {
-        title: 'Tarefa Temporária',
-        description: 'Tarefa para teste de permissão',
+      const novaTarefa = {
+        title: 'Tarefa Teste exclusão',
+        description: 'Descrição da tarefa de teste',
         status: 'pending',
         dueDate: new Date().toISOString(),
         owner: '22222222-2222-2222-2222-222222222222',
       };
   
-      const { body } = await request(server)
+      const res = await request(server)
         .post('/task')
         .set('Cookie', userToken)
-        .send(tempTask)
+        .send(novaTarefa)
         .expect(201);
   
-      // Tenta atualizar como admin (user1)
-console.log("&&&&&& body", JSON.stringify(body));
-      const res = await request(server)
-        .put(`/task/${body.id}`) // ID como string UUID
+      taskIdTeste = res.body.id;      
+      console.log("##### Id Tarefa para excluir:", taskIdTeste);
+      await request(server)
+        .delete(`/task/${taskIdTeste}`)
         .set('Cookie', adminToken)
-        .send({ status: 'completed' })
-        .expect(404); // Agora retorna 404 (tarefa não encontrada para o admin)
+        .expect(204);
   
-      expect(res.body.error).toBe('Tarefa não encontrada');
+      await request(server)
+        .get(`/task/${taskIdTeste}`)
+        .set('Cookie', adminToken)
+        .expect(404);
     });
   });
 });

@@ -1,6 +1,7 @@
 // __tests__/services/tasksListService.test.mjs
 import { jest } from '@jest/globals';
 import { Binary } from 'mongodb';
+import { stringParaUuidBinario } from '../../services/taskCrudService.mjs';
 
 jest.unstable_mockModule('../../db.mjs', () => ({
   getDB: jest.fn(),
@@ -62,6 +63,7 @@ describe('tasksListService - getTasks', () => {
     
     // Configura mock da coleção de tasks
     const mockTask = {
+      id: stringParaUuidBinario('11111111-1111-1111-1111-111111111111'),
       title: 'Task 1',
       status: 'pending',
       dueDate: new Date('2023-11-05T18:00:00Z'),
@@ -96,6 +98,7 @@ describe('tasksListService - getTasks', () => {
     expect(result).toEqual({
       tasks: [
         {
+          id: "11111111-1111-1111-1111-111111111111",
           title: 'Task 1',
           status: 'pending',
           dueDate: new Date('2023-11-05T18:00:00Z'),
@@ -113,6 +116,7 @@ describe('tasksListService - getTasks', () => {
     
     // Configura mock da coleção de tasks
     const mockTask = {
+      id: stringParaUuidBinario('11111111-1111-1111-1111-111111111111'),
       title: 'Admin Task 1',
       status: 'pending',
       dueDate: new Date('2023-11-05T18:00:00Z'),
@@ -147,6 +151,7 @@ describe('tasksListService - getTasks', () => {
     expect(result).toEqual({
       tasks: [
         {
+          id: "11111111-1111-1111-1111-111111111111",
           title: 'Admin Task 1',
           status: 'pending',
           dueDate: new Date('2023-11-05T18:00:00Z'),

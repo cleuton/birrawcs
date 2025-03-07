@@ -15,10 +15,8 @@ An open-source WCS app, written in NodeJS and React, and using MongoDB
 12. Se o "user" for "admin", aparecem todas as tarefas que ele cadastrou após o login, em ordem decrescente de "dueDate". Só aquelas que estão com status "pending" ou "working". Se o user não for admin, só aparecem as dele (owner). Ok
 13. Listar todas as tarefas: Ok
 14. Na listagem de tarefas, elas devem vir em ordem decrescente de "dueDate" e deve ser possível selecionar o status: "todas" ou aquelas com algum status especial. Ok
-15. CRUD tarefa: **Pendente**: Parei no frontend: 
-    - Está mostrando os botões EDIT/UPDATE
-    - O PUT está dando erro 404. 
-16. Comentar uma tarefa (PATCH): **Pendente** 
+15. CRUD tarefa: Ok.
+16. Alterar CRUD inclusão / consulta / alteração para selecionar / mostrar nome do usuário. **Pendente**
 17. Mudar status de uma tarefa (PATCH): **Pendente**
 
 

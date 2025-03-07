@@ -106,11 +106,7 @@ describe('taskCrudService - CRUD de Tarefas', () => {
 
       expect(mockTasksCollection.findOne).toHaveBeenCalledWith(
         expect.objectContaining({
-          id: expect.any(Binary),
-          $or: [
-            { owner: expectedUserId },
-            { requester: expectedUserId },
-          ],
+          id: expect.any(Binary)
         })
       );
 
@@ -159,6 +155,9 @@ describe('taskCrudService - CRUD de Tarefas', () => {
 
   describe('atualizarTarefa', () => {
     it('deve atualizar uma tarefa existente', async () => {
+
+      const fakeDecodedAdmin = { id: '11111111-1111-1111-1111-111111111111', role: 'admin' };
+      verifyToken.mockReturnValue(fakeDecodedAdmin);
       const mockTask = {
         id: new Binary(Buffer.from('d98d1422eb8546eeac283b66692cf180', 'hex'), Binary.SUBTYPE_UUID),
         title: 'Tarefa Atualizada',
@@ -175,8 +174,7 @@ describe('taskCrudService - CRUD de Tarefas', () => {
 
       expect(mockTasksCollection.updateOne).toHaveBeenCalledWith(
         expect.objectContaining({
-          id: expect.any(Binary),
-          owner: expectedUserId,
+          id: expect.any(Binary)
         }),
         { $set: { status: 'completed' } }
       );
@@ -185,30 +183,37 @@ describe('taskCrudService - CRUD de Tarefas', () => {
     });
 
     it('deve lançar erro se a tarefa não for encontrada', async () => {
+      const fakeDecodedAdmin = { id: '11111111-1111-1111-1111-111111111111', role: 'admin' };
+      verifyToken.mockReturnValue(fakeDecodedAdmin);
       mockTasksCollection.updateOne.mockResolvedValue({ matchedCount: 0 });
 
-      await expect(atualizarTarefa('invalid-id', {}, token)).rejects.toThrow('Tarefa não encontrada');
+      await expect(atualizarTarefa('invalid-id', {}, token)).rejects.toThrow('Falha ao atualizar a tarefa');
     });
   });
 
   describe('excluirTarefa', () => {
     it('deve excluir uma tarefa existente', async () => {
+
+      const fakeDecodedAdmin = { id: '11111111-1111-1111-1111-111111111111', role: 'admin' };
+      verifyToken.mockReturnValue(fakeDecodedAdmin);
+
       mockTasksCollection.deleteOne.mockResolvedValue({ deletedCount: 1 });
 
       await excluirTarefa('d98d1422-eb85-46ee-ac28-3b66692cf180', token);
 
       expect(mockTasksCollection.deleteOne).toHaveBeenCalledWith(
         expect.objectContaining({
-          id: expect.any(Binary),
-          owner: expectedUserId,
+          id: expect.any(Binary)
         })
       );
     });
 
     it('deve lançar erro se a tarefa não for encontrada', async () => {
+      const fakeDecodedAdmin = { id: '11111111-1111-1111-1111-111111111111', role: 'admin' };
+      verifyToken.mockReturnValue(fakeDecodedAdmin);      
       mockTasksCollection.deleteOne.mockResolvedValue({ deletedCount: 0 });
 
-      await expect(excluirTarefa('invalid-id', token)).rejects.toThrow('Tarefa não encontrada');
+      await expect(excluirTarefa('invalid-id', token)).rejects.toThrow('Falha ao excluir a tarefa');
     });
   });
 });

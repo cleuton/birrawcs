@@ -67,14 +67,16 @@ export async function getTasks(token, statusFilter, page = 1, pageSize = 10) {
     }, {}));
 
   // Mapeia os nomes dos usuários nas tarefas
-  const resultTasks = tasks.map(task => ({
-    id: uuidBinarioParaString(task.id),
-    title: task.title,
-    status: task.status,
-    dueDate: task.dueDate,
-    requestedBy: usersMap[task.requester.toString()],
-    ownedBy: usersMap[task.owner.toString()]
-  }));
+  const resultTasks = tasks.map(task => {
+    return {
+      id: uuidBinarioParaString(task.id),
+      title: task.title,
+      status: task.status,
+      dueDate: task.dueDate,
+      requestedBy: usersMap[task.requester.toString()],
+      ownedBy: usersMap[task.owner.toString()]
+    };
+  });
 
   return {
     tasks: resultTasks,

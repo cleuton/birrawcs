@@ -11,7 +11,7 @@ const TaskCrud = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    status: '',
+    status: 'pending',
     dueDate: '',
     owner: '',
     attachment: '',
