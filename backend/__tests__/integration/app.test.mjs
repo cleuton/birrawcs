@@ -10,6 +10,7 @@ import summaryRouter from '../../routes/summary.mjs';
 import tasksRouter from '../../routes/tasks.mjs';
 import taskListRouter from '../../routes/taskList.mjs'; 
 import taskCrudRoutes from '../../routes/taskCrud.mjs';
+import userRoutes from '../../routes/user.mjs';
 
 const app = express();
 app.use(express.json());
@@ -21,6 +22,7 @@ app.use('/', summaryRouter);
 app.use('/', tasksRouter);
 app.use('/', taskListRouter); 
 app.use('/', taskCrudRoutes);
+app.use('/', userRoutes);
 
 
 let server;
@@ -284,5 +286,59 @@ describe('Integração - API REST', () => {
         .expect(404);
     });
   });
+
+  // Usuários
+  describe('GET /user', () => {
+    it('deve retornar 401 se o token não for fornecido', async () => {
+      const res = await request(server).get('/user');
+      expect(res.status).toBe(401);
+      expect(res.body).toHaveProperty('error', 'Não autenticado');
+    });
+
+    it('deve retornar o usuário se o token for válido', async () => {
+      const loginRes = await request(server)
+        .post('/login')
+        .send(validUser);
+      const cookies = loginRes.headers['set-cookie'];
+      expect(cookies).toBeDefined();
+
+      const res = await request(server)
+        .get('/user')
+        .set('Cookie', cookies);
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty('role');
+      expect(res.body).toHaveProperty('userId');
+    });
+  });
+
+  describe('GET /user/:id/detail', () => {
+    it('deve retornar 401 se o token não for fornecido', async () => {
+      const res = await request(server).get('/user/12345678/detail');
+      expect(res.status).toBe(401);
+      expect(res.body).toHaveProperty('error', 'Não autenticado');
+    });
+   
+    it('deve retornar os detalhes do usuário se o token for válido', async () => {
+      const loginRes = await request(server)
+        .post('/login')
+        .send(validUser);
+      const cookies = loginRes.headers['set-cookie'];
+      expect(cookies).toBeDefined();
+      const validUser2 = {
+        id: '22222222-2222-2222-2222-222222222222',
+        email: 'user2@example.com',
+        password: 'senha2',
+      };
+      const res = await request(server)
+        .get(`/user/${validUser2.id}/detail`)
+        .set('Cookie', cookies);
+
+console.log("##### Resposta:", res.body);        
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty('email', validUser.email);
+    });
+  });
 });
+
+
 
