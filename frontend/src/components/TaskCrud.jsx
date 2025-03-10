@@ -34,12 +34,15 @@ const TaskCrud = () => {
         })
         .then(data => {
           setTask(data);
-          setSelectedUser(data.ownerUser);
+          setSelectedUser({
+            value: data.owner,  // ID do usuário
+            label: data.ownerUser // Nome do usuário
+          });
           setFormData({
             title: data.title,
             description: data.description,
             status: data.status,
-            dueDate: data.dueDate,
+            dueDate: data.dueDate.split('T')[0] || '',
             owner: data.owner,
             ownerUser: data.ownerUser,
             requester: data.requester,
@@ -64,6 +67,12 @@ const TaskCrud = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!formData.owner) {
+      setError('Selecione um responsável');
+      return;
+    }
+
     const requestOptions = {
       method: mode === 'create' ? 'POST' : 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -76,7 +85,7 @@ const TaskCrud = () => {
         if (!res.ok) throw new Error(`Erro ao ${mode === 'create' ? 'criar' : 'atualizar'} tarefa`);
         return res.json();
       })
-      .then(data => navigate(`/task/${data.id}`))
+      .then(data => navigate(`/task/${id}`))
       .catch(err => setError(err.message));
   };
 
@@ -132,9 +141,10 @@ const TaskCrud = () => {
             value={formData.status}
             onChange={(e) => setFormData({ ...formData, status: e.target.value })}
           >
-            <option value="pendente">Pendente</option>
-            <option value="em_progresso">Em Progresso</option>
-            <option value="concluida">Concluída</option>
+            <option value="pending">Pendente</option>
+            <option value="working">Em Progresso</option>
+            <option value="completed">Concluída</option>
+            <option value="suspended">Suspensa</option>
           </select>
           <input
             type="date"
