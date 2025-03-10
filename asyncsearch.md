@@ -6,7 +6,7 @@ Vou explicar em detalhes a alternativa usando `react-select/async`, um component
 É uma biblioteca popular para criar dropdowns/selects customizáveis em React. A versão `AsyncSelect` é específica para casos onde as opções são carregadas **dinamicamente via API** (busca assíncrona).
 
 ---
-
+ 
 ### **2. Código Explicado**
 
 ```jsx

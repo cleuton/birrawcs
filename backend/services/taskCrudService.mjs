@@ -150,6 +150,11 @@ export const atualizarTarefa = async (idTarefa, dadosAtualizacao, token) => {
         delete dadosAtualizacao._id;
       }
     let resultado;
+    dadosAtualizacao.id = stringParaUuidBinario(idTarefa);
+    dadosAtualizacao.owner = stringParaUuidBinario(dadosAtualizacao.owner);
+    dadosAtualizacao.requester = stringParaUuidBinario(dadosAtualizacao.requester);
+    dadosAtualizacao.dueDate = new Date(dadosAtualizacao.dueDate);
+    delete dadosAtualizacao.comments;
       try {
         resultado = await colecaoTarefas.updateOne(
           { 
