@@ -276,7 +276,6 @@ describe('Integração - API REST', () => {
         .expect(201);
   
       taskIdTeste = res.body.id;      
-      console.log("##### Id Tarefa para excluir:", taskIdTeste);
       await request(server)
         .delete(`/task/${taskIdTeste}`)
         .set('Cookie', adminToken)
@@ -340,16 +339,16 @@ describe('Integração - API REST', () => {
     });
   });
 
-  describe('GET /user/:role', () => {
+  describe('GET /user/byrole/:role', () => {
     it('deve retornar 401 se o token não for fornecido', async () => {
-      const res = await request(server).get('/user/admin');
+      const res = await request(server).get('/user/byrole/admin');
       expect(res.status).toBe(401);
       expect(res.body).toHaveProperty('error', 'Não autenticado');
     });
   
     it('deve retornar 403 se o token for inválido', async () => {
       const res = await request(server)
-        .get('/user/admin')
+        .get('/user/byrole/admin')
         .set('Cookie', 'token=invalido');
       expect(res.status).toBe(403);
       expect(res.body).toHaveProperty('error', 'Not authenticated');
@@ -364,7 +363,7 @@ describe('Integração - API REST', () => {
       expect(cookies).toBeDefined();
   
       const res = await request(server)
-        .get('/user/admin')
+        .get('/user/byrole/admin')
         .set('Cookie', cookies);
       expect(res.status).toBe(200);
       // Supondo que getUsersByRole retorne um array
@@ -384,7 +383,7 @@ describe('Integração - API REST', () => {
       expect(cookies).toBeDefined();
   
       const res = await request(server)
-        .get('/user/usuario') // Qualquer valor diferente de 'admin'
+        .get('/user/byrole/user') // Qualquer valor diferente de 'admin'
         .set('Cookie', cookies);
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
@@ -394,7 +393,40 @@ describe('Integração - API REST', () => {
       }
     });
   });
+
+  describe('GET /user/search', () => {
+    it('deve retornar 401 se o token não for fornecido', async () => {
+      const res = await request(server).get('/user/search');
+      expect(res.status).toBe(401);
+      expect(res.body).toHaveProperty('error', 'Não autenticado');
+    });
+  
+    it('deve retornar 403 se o token for inválido', async () => {
+      const res = await request(server)
+        .get('/user/search')
+        .set('Cookie', 'token=invalido');
+      expect(res.status).toBe(403);
+      expect(res.body).toHaveProperty('error', 'Not authenticated');
+    });
+  
+    it('deve retornar a lista de usuários correspondentes à pesquisa', async () => {
+      // Autentica com um usuário regular
+      const loginRes = await request(server)
+        .post('/login')
+        .send({ email: 'user1@example.com', password: 'senha1' });
+      const cookies = loginRes.headers['set-cookie'];
+      expect(cookies).toBeDefined();
+      const res = await request(server)
+        .get('/user/search?filter=Usuário 2') // Qualquer valor diferente de 'admin'
+        .set('Cookie', cookies);            
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(1);
+      for (const user of res.body) {
+        expect(user).toHaveProperty('id', '22222222-2222-2222-2222-222222222222');
+      }
+    });      
+
+  });  
+
 });
-
-
-

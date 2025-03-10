@@ -2,11 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import UserSelect from "./UserSelect";
 
 const TaskCrud = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth(); // Obtém os dados do usuário do contexto
+  const [selectedUser, setSelectedUser] = useState(null); // Estado para armazenar o usuário selecionado
   const [task, setTask] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
@@ -32,6 +34,7 @@ const TaskCrud = () => {
         })
         .then(data => {
           setTask(data);
+          setSelectedUser(data.ownerUser);
           setFormData({
             title: data.title,
             description: data.description,
@@ -48,6 +51,16 @@ const TaskCrud = () => {
         .catch(err => setError(err.message));
     }
   }, [id]);
+
+  const handleUserSelect = (selectedOption) => {
+    setSelectedUser(selectedOption);
+    setFormData({
+      ...formData,
+      owner: selectedOption ? selectedOption.value : '',
+      ownerUser: selectedOption ? selectedOption.label : ''
+    });
+  };
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -128,12 +141,17 @@ const TaskCrud = () => {
             value={formData.dueDate}
             onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
           />
-          <input
+          {/* <input
             type="text"
             value={formData.owner}
             onChange={(e) => setFormData({ ...formData, owner: e.target.value })}
             placeholder="Responsável"
-          />
+          />*/}
+          {/* Campo de Responsável modificado */}
+          <UserSelect 
+            value={selectedUser} 
+            onChange={handleUserSelect} 
+          />          
           <button type="submit">
             {mode === 'create' ? 'Criar Tarefa' : 'Atualizar Tarefa'}
           </button>

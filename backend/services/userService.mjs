@@ -67,9 +67,12 @@ export async function searchUsersByName(userName) {
     try {
         const db = getDB();
         const usersCollection = db.collection('users');
-        const escapedUserName = escapeRegex(userName);
-        const regex = new RegExp(escapedUserName, 'i');
-        const users = await usersCollection.find({ name: regex }).toArray();
+        const cleanUserName = userName.replace(/["']/g, '');
+        const escapedUserName = escapeRegex(cleanUserName);   
+        const regex = new RegExp(escapedUserName, 'i'); 
+        const users = await usersCollection.find({ 
+          name: regex
+        }).toArray();      
         return users.map(user => ({
             id: user.id,
             name: user.name
