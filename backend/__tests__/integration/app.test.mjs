@@ -220,11 +220,12 @@ describe('Integração - API REST', () => {
         status: 'pending',
         dueDate: new Date().toISOString(),
         owner: '22222222-2222-2222-2222-222222222222',
+        requester: '11111111-1111-1111-1111-111111111111',
       };
   
       const res = await request(server)
         .post('/task')
-        .set('Cookie', userToken)
+        .set('Cookie', adminToken)
         .send(novaTarefa)
         .expect(201);
   
@@ -247,7 +248,7 @@ describe('Integração - API REST', () => {
       const result1 = await request(server)
         .get(`/task/${taskIdTeste}`) // Usa UUID string
         .set('Cookie', adminToken)
-        .expect(200);      
+        .expect(200); 
       result1.body.status = 'completed';    
       const res = await request(server)
         .put(`/task/${taskIdTeste}`)
@@ -265,6 +266,7 @@ describe('Integração - API REST', () => {
         status: 'pending',
         dueDate: new Date().toISOString(),
         owner: '22222222-2222-2222-2222-222222222222',
+        requester: '11111111-1111-1111-1111-111111111111',
       };
   
       const res = await request(server)
@@ -332,10 +334,64 @@ describe('Integração - API REST', () => {
       const res = await request(server)
         .get(`/user/${validUser2.id}/detail`)
         .set('Cookie', cookies);
-
-console.log("##### Resposta:", res.body);        
+      
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty('email', validUser.email);
+    });
+  });
+
+  describe('GET /user/:role', () => {
+    it('deve retornar 401 se o token não for fornecido', async () => {
+      const res = await request(server).get('/user/admin');
+      expect(res.status).toBe(401);
+      expect(res.body).toHaveProperty('error', 'Não autenticado');
+    });
+  
+    it('deve retornar 403 se o token for inválido', async () => {
+      const res = await request(server)
+        .get('/user/admin')
+        .set('Cookie', 'token=invalido');
+      expect(res.status).toBe(403);
+      expect(res.body).toHaveProperty('error', 'Not authenticated');
+    });
+  
+    it('deve retornar a lista de usuários para role admin se o token for válido', async () => {
+      // Autentica com um usuário admin
+      const adminRes = await request(server)
+        .post('/login')
+        .send({ email: 'user1@example.com', password: 'senha1' });
+      const cookies = adminRes.headers['set-cookie'];
+      expect(cookies).toBeDefined();
+  
+      const res = await request(server)
+        .get('/user/admin')
+        .set('Cookie', cookies);
+      expect(res.status).toBe(200);
+      // Supondo que getUsersByRole retorne um array
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(1);
+      for (const user of res.body) {
+        expect(user).toHaveProperty('id', '11111111-1111-1111-1111-111111111111');
+      }
+    });
+  
+    it('deve retornar a lista de usuários para role não-admin se o token for válido', async () => {
+      // Autentica com um usuário regular
+      const loginRes = await request(server)
+        .post('/login')
+        .send({ email: 'user2@example.com', password: 'senha2' });
+      const cookies = loginRes.headers['set-cookie'];
+      expect(cookies).toBeDefined();
+  
+      const res = await request(server)
+        .get('/user/usuario') // Qualquer valor diferente de 'admin'
+        .set('Cookie', cookies);
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBeGreaterThan(1);
+      for (const user of res.body) {
+        expect(user).not.toHaveProperty('id', '11111111-1111-1111-1111-111111111111');
+      }
     });
   });
 });

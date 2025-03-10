@@ -14,6 +14,9 @@ const TaskCrud = () => {
     status: 'pending',
     dueDate: '',
     owner: '',
+    ownerUser: '',
+    requester: '',
+    requesterUser: '',
     attachment: '',
     comments: []
   });
@@ -35,6 +38,9 @@ const TaskCrud = () => {
             status: data.status,
             dueDate: data.dueDate,
             owner: data.owner,
+            ownerUser: data.ownerUser,
+            requester: data.requester,
+            requesterUser: data.requesterUser,
             attachment: data.attachment,
             comments: data.comments
           });
@@ -84,7 +90,8 @@ const TaskCrud = () => {
           <p><strong>Descrição:</strong> {task.description}</p>
           <p><strong>Status:</strong> {task.status}</p>
           <p><strong>Prazo:</strong> {new Date(task.dueDate).toLocaleDateString()}</p>
-          <p><strong>Responsável:</strong> {task.owner}</p>
+          <p><strong>Demandante:</strong> {task.requesterUser}</p>
+          <p><strong>Responsável:</strong> {task.ownerUser}</p>
           {/* Verifica se o usuário existe e se sua role é admin */}
           {user && user.role === 'admin' && (
             <>

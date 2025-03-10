@@ -61,14 +61,10 @@ export async function getTasks(token, statusFilter, page = 1, pageSize = 10) {
   
     // Obtém os nomes dos usuários requisitantes e proprietários
     const userIds = tasks.flatMap(task => [task.requester, task.owner]);
-    const usersMap = await usersCollection.find({ _id: { $in: userIds } })
+    const usersMap = await usersCollection.find({ id: { $in: userIds } })
       .project({ name: 1 })
-      .toArray()
-      .then(users => users.reduce((map, user) => {
-        map[user._id.toString()] = user.name;
-        return map;
-      }, {}));
-  
+      .toArray();
+
     // Mapeia os nomes dos usuários nas tarefas
     const resultTasks = tasks.map(task => {
       return {
@@ -76,11 +72,10 @@ export async function getTasks(token, statusFilter, page = 1, pageSize = 10) {
         title: task.title,
         status: task.status,
         dueDate: task.dueDate,
-        requestedBy: usersMap[task.requester.toString()],
-        ownedBy: usersMap[task.owner.toString()]
+        requestedBy: usersMap[0].name,
+        ownedBy: usersMap[1].name
       };
     });
-  
     return {
       tasks: resultTasks,
       totalPages: totalPages
@@ -90,6 +85,6 @@ export async function getTasks(token, statusFilter, page = 1, pageSize = 10) {
       throw erro;
     } 
     logger.error(`Erro ao obter lista de tarefas: ${erro}`);
-    throw new Error('Usuário não encontrado');
+    throw new Error('Erro ao obter lista de tarefas');
   }
 }

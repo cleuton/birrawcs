@@ -53,3 +53,30 @@ export async function getUsersByRole(admin) {
         throw new Error('Falha ao obter usuários');
     }
 };
+
+export async function searchUsersByName(userName) {
+    if (!userName) {
+        logger.error('userService: Nome do usuário não informado');
+        throw new Error('Nome do usuário não informado');
+    }
+
+    const escapeRegex = (text) => {
+      return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+    };
+    
+    try {
+        const db = getDB();
+        const usersCollection = db.collection('users');
+        const escapedUserName = escapeRegex(userName);
+        const regex = new RegExp(escapedUserName, 'i');
+        const users = await usersCollection.find({ name: regex }).toArray();
+        return users.map(user => ({
+            id: user.id,
+            name: user.name
+        }));
+    }
+    catch (error) {
+        logger.error(`userService: Falha ao obter usuários: ${error}`);
+        throw new Error('Falha ao obter usuários');
+    }
+}

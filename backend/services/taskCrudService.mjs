@@ -86,18 +86,29 @@ export const obterTarefaPorId = async (idTarefa, token) => {
   try {
     const db = getDB();
     const colecaoTarefas = db.collection('tasks');
+    const usersCollection = db.collection('users');
   
     const tarefa = await colecaoTarefas.findOne({
       id: stringParaUuidBinario(idTarefa)
     });
-  
+
     if (!tarefa) {
       const errorMessage = 'Tarefa não encontrada';
       throw new Error(errorMessage);
     }
   
+    // Prepara dados estendidos da tarefa:
+    // Obtém os nomes dos usuários requisitantes e proprietários
+    const userIds = [tarefa.requester, tarefa.owner];
+    const usersMap = await usersCollection.find({ id: { $in: userIds } })
+      .project({ id: 1, name: 1 })
+      .toArray();    
     // Converte o ID binário para string UUID
-    return { ...tarefa, id: uuidBinarioParaString(tarefa.id) };
+    return { ...tarefa, 
+      id: uuidBinarioParaString(tarefa.id),
+      requesterUser: usersMap[0].name,
+      ownerUser: usersMap[1].name,
+    };
   } catch (error) {
     if (error.message === 'Tarefa não encontrada') {
       throw error;

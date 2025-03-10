@@ -76,14 +76,19 @@ function TaskList() {
       {error && <p style={{ color: 'red' }}>{error}</p>}
       
       <ul>
-        {tasks.map((task) => (
-          <li key={task.id}>
-            <Link to={`/task/${task.id}`}>
-              {task.title} - {task.status}
-            </Link>
-            <span>&nbsp; Prazo: {new Date(task.dueDate).toLocaleString()}</span>
-          </li>
-        ))}
+        {tasks.map((task) => {
+          console.log(task);
+          return (
+            <li key={task.id}>
+              <Link to={`/task/${task.id}`}>
+                {task.title} - {task.status}
+              </Link>
+              <span>&nbsp; Prazo: {new Date(task.dueDate).toLocaleString()}</span>
+              <span>&nbsp; Demandante: {task.requestedBy}</span>
+              <span>&nbsp; Responsável: {task.ownedBy}</span>
+            </li>
+          );
+        })}
       </ul>
 
       <div>

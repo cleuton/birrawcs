@@ -84,7 +84,8 @@ describe('tasksListService - getTasks', () => {
     mockUsersCollection.find.mockReturnValue({
       project: jest.fn().mockReturnThis(),
       toArray: jest.fn().mockResolvedValue([
-        { _id: expectedUserId, name: 'Usuário 1' }
+        { id: expectedUserId, name: 'Usuário 1' },
+        { id: expectedUserId, name: 'Usuário 1' }
       ]),
     });
 
@@ -137,7 +138,8 @@ describe('tasksListService - getTasks', () => {
     mockUsersCollection.find.mockReturnValue({
       project: jest.fn().mockReturnThis(),
       toArray: jest.fn().mockResolvedValue([
-        { _id: expectedUserId, name: 'Usuário 1' }
+        { id: expectedUserId, name: 'Usuário 1' },
+        { id: expectedUserId, name: 'Usuário 1' }
       ]),
     });
 

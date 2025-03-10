@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+import { describe, jest } from '@jest/globals';
 import { stringParaUuidBinario } from '../../services/taskCrudService.mjs';
 
 // Configura o mock do módulo do banco
@@ -131,4 +131,21 @@ describe('getUsersByRole function', () => {
         const result2 = await getUsersByRole(false);   
         expect(result2).toEqual(fakeReturnedUser);
     });
+
+    describe('searchUsersByName function', () => {
+        it('deve lançar erro se nome do usuário não for informado', async () => {
+            const { searchUsersByName } = await import('../../services/userService.mjs');
+            await expect(searchUsersByName(null)).rejects.toThrow('Nome do usuário não informado');
+        });
+        
+        it('deve lançar erro se falhar ao obter usuários', async () => {
+            const { searchUsersByName } = await import('../../services/userService.mjs');
+            const fakeCollection = { find: jest.fn().mockReturnValue({ toArray: jest.fn().mockRejectedValue(new Error('Erro ao obter usuários')) }) };
+            getDB.mockReturnValue({ collection: jest.fn(() => fakeCollection) });
+        
+            await expect(searchUsersByName('Fulano')).rejects.toThrow('Falha ao obter usuários');
+        });
+        
+    } );
+
 });

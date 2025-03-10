@@ -25,6 +25,7 @@ describe('taskCrudService - CRUD de Tarefas', () => {
   const expectedUserId = new Binary(uuidBuffer, Binary.SUBTYPE_UUID);
 
   let mockTasksCollection;
+  let mockUsersCollection;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -38,8 +39,16 @@ describe('taskCrudService - CRUD de Tarefas', () => {
       toArray: jest.fn(),
     };
 
+    mockUsersCollection = {
+      findOne: jest.fn(),
+      find: jest.fn().mockReturnThis(),
+      project: jest.fn().mockReturnThis(),
+      toArray: jest.fn(),
+    };
+
     getDB.mockReturnValue({
       collection: (name) => {
+        if (name === 'users') return mockUsersCollection;
         if (name === 'tasks') return mockTasksCollection;
         return null;
       },
@@ -99,6 +108,15 @@ describe('taskCrudService - CRUD de Tarefas', () => {
         requester: expectedUserId,
         owner: expectedUserId,
       };
+
+      // Mock dos usuários para o map
+      mockUsersCollection.find.mockReturnValue({
+        project: jest.fn().mockReturnThis(),
+        toArray: jest.fn().mockResolvedValue([
+          { id: expectedUserId, name: 'Usuário 1' },
+          { id: expectedUserId, name: 'Usuário 1' }
+        ]),
+      });
 
       mockTasksCollection.findOne.mockResolvedValue(mockTask);
 
