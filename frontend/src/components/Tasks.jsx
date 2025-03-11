@@ -1,5 +1,21 @@
 // Tasks.jsx
 import React from 'react';
+import { Link } from 'react-router-dom';
+
+export function converteStatus(status) {
+  switch (status) {
+    case 'pending':
+      return 'Pendente';
+    case 'working':
+      return 'Em progresso';
+    case 'completed':
+      return 'Concluída';
+    case 'suspended':
+        return 'Suspensa';      
+    default:
+      return status;
+  }
+}
 
 function Tasks({ tasks, comments }) {
   return (
@@ -9,9 +25,11 @@ function Tasks({ tasks, comments }) {
         tasks.length > 0 ? (
           <ul>
             {tasks.slice(0, 5).map((task, index) => (
-              <li key={index}>
-                <strong>{task.title}</strong> - {task.status} -{' '}
-                {new Date(task.dueDate).toLocaleString('pt-BR')}
+              <li key={task.taskId}>
+              <Link to={`/task/${task.id}`}>
+                {task.title} - {converteStatus(task.status)}
+              </Link>                
+                <span>&nbsp; - {new Date(task.dueDate).toLocaleString('pt-BR')}</span>
               </li>
             ))}
           </ul>
@@ -28,8 +46,8 @@ function Tasks({ tasks, comments }) {
           <h2>Últimos comentários</h2>
           <ul>
             {comments.slice(0, 5).map((comment, index) => (
-              <li key={index}>
-                <strong>Task ID: {comment.taskId}</strong> - {comment.userName} -{' '}
+              <li key={comment.taskId}>
+                <strong><Link to={`/task/${comment.taskId}`}>Abrir tarefa </Link></strong> - {comment.userName} -{' '}
                 {new Date(comment.datePosted).toLocaleString('pt-BR')} - {comment.text}
               </li>
             ))}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { converteStatus } from './Tasks.jsx';
 
 function TaskList() {
   const [tasks, setTasks] = useState([]);
@@ -81,7 +82,7 @@ function TaskList() {
           return (
             <li key={task.id}>
               <Link to={`/task/${task.id}`}>
-                {task.title} - {task.status}
+                {task.title} - {converteStatus(task.status)}
               </Link>
               <span>&nbsp; Prazo: {new Date(task.dueDate).toLocaleString()}</span>
               <span>&nbsp; Demandante: {task.requestedBy}</span>

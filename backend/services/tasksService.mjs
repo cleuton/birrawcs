@@ -33,7 +33,7 @@ export async function getTasksAndComments(token) {
         status: { $in: ['pending', 'working'] }
       })
       .sort({ dueDate: -1 })
-      .project({ title: 1, status: 1, dueDate: 1, _id: 0 })
+      .project({ id: 1, title: 1, status: 1, dueDate: 1, _id: 0 })
       .toArray();
 
       // Se não encontrar tasks 'pending' ou 'working',
@@ -56,7 +56,7 @@ export async function getTasksAndComments(token) {
         status: { $in: ['pending', 'working'] }
       })
       .sort({ dueDate: -1 })
-      .project({ title: 1, status: 1, dueDate: 1, _id: 0 })
+      .project({ id: 1, title: 1, status: 1, dueDate: 1, _id: 0 })
       .toArray();
 
       // Se não encontrar, busca a última com status "completed"
@@ -66,7 +66,7 @@ export async function getTasksAndComments(token) {
           status: 'completed'
         })
         .sort({ dueDate: -1 })
-        .project({ title: 1, status: 1, dueDate: 1, _id: 0 })
+        .project({ id: 1, title: 1, status: 1, dueDate: 1, _id: 0 })
         .limit(1)
         .toArray();
       }

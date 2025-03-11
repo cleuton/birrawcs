@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import UserSelect from "./UserSelect";
+import { converteStatus } from './Tasks.jsx';
 
 const TaskCrud = () => {
   const { id } = useParams();
@@ -133,7 +134,7 @@ const TaskCrud = () => {
         <div>
           <h2>{task.title}</h2>
           <p><strong>Descrição:</strong> {task.description}</p>
-          <p><strong>Status:</strong> {task.status}</p>
+          <p><strong>Status:</strong> {converteStatus(task.status)}</p>
           <p><strong>Prazo:</strong> {new Date(task.dueDate).toLocaleDateString()}</p>
           <p><strong>Demandante:</strong> {task.requesterUser}</p>
           <p><strong>Responsável:</strong> {task.ownerUser}</p>
