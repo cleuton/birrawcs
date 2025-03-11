@@ -19,7 +19,11 @@ An open-source WCS app, written in NodeJS and React, and using MongoDB
 16. Alterar CRUD inclusão / consulta / alteração para selecionar / mostrar nome do usuário. Ok.
 17. Está com um problema quando excluímos uma tarefa e paginamos no listar tarefas. Ok.
 18. Repetir npm test / integration test. Ok.
-19. Mudar status de uma tarefa (PATCH): Falta fazer a parte frontend **Pendente**
+19. Mudar status de uma tarefa (PATCH): Falta fazer a parte frontend Ok.
+20. Ao mostrar a tarefa (view) mostra o status em inglês. **pendente**.
+21. Componente Tasks deveria mostrar link para a tarefa. **pendente**.
+22. Aplicar estilo Tailwind. **pendente**.
+23. Criar testes para os componentes React. **pendente**.
 
 
 ## Para executar os testes

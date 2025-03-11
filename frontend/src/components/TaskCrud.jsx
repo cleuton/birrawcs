@@ -35,8 +35,8 @@ const TaskCrud = () => {
         .then(data => {
           setTask(data);
           setSelectedUser({
-            value: data.owner,  // ID do usuário
-            label: data.ownerUser // Nome do usuário
+            value: data.owner,
+            label: data.ownerUser
           });
           setFormData({
             title: data.title,
@@ -63,7 +63,6 @@ const TaskCrud = () => {
       ownerUser: selectedOption ? selectedOption.label : ''
     });
   };
-
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -103,6 +102,30 @@ const TaskCrud = () => {
     }
   };
 
+  // Função para tratar a alteração do status da tarefa via PATCH
+  const handleStatusChange = (e) => {
+    const newStatus = e.target.value;
+    fetch(`/task/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ status: newStatus })
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Erro ao alterar status da tarefa');
+        // Se o servidor retornar 204 (no content), atualizamos manualmente
+        if (res.status === 204) {
+          return { ...task, status: newStatus };
+        }
+        return res.json();
+      })
+      .then(updatedTask => {
+        setTask(updatedTask);
+        setFormData(prevData => ({ ...prevData, status: updatedTask.status }));
+      })
+      .catch(err => setError(err.message));
+  };
+
   return (
     <div>
       {error && <div className="error">{error}</div>}
@@ -114,7 +137,21 @@ const TaskCrud = () => {
           <p><strong>Prazo:</strong> {new Date(task.dueDate).toLocaleDateString()}</p>
           <p><strong>Demandante:</strong> {task.requesterUser}</p>
           <p><strong>Responsável:</strong> {task.ownerUser}</p>
-          {/* Verifica se o usuário existe e se sua role é admin */}
+
+          {/* Se o usuário for o responsável, exibe o select para alterar o status */}
+          {user && user.userId === task.owner && (
+            <div>
+              <label htmlFor="statusSelect"><strong>Alterar status:</strong></label>
+              <select id="statusSelect" value={task.status} onChange={handleStatusChange}>
+                <option value="pending">Pendente</option>
+                <option value="working">Em Progresso</option>
+                <option value="completed">Concluída</option>
+                <option value="suspended">Suspensa</option>
+              </select>
+            </div>
+          )}
+
+          {/* Botões para administrador */}
           {user && user.role === 'admin' && (
             <>
               <button onClick={() => setMode('edit')}>Editar</button>
@@ -151,13 +188,6 @@ const TaskCrud = () => {
             value={formData.dueDate}
             onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
           />
-          {/* <input
-            type="text"
-            value={formData.owner}
-            onChange={(e) => setFormData({ ...formData, owner: e.target.value })}
-            placeholder="Responsável"
-          />*/}
-          {/* Campo de Responsável modificado */}
           <UserSelect 
             value={selectedUser} 
             onChange={handleUserSelect} 

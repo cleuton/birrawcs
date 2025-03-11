@@ -210,9 +210,10 @@ export const atualizarStatusTarefa = async (idTarefa, novoStatus, token) => {
       throw new Error(errorMessage);
     }
 
-    const owner = tarefa.owner;
-    const requester = tarefa.requester;
-    if (!isAdmin && (owner !== idUsuario || requester !== idUsuario)) {
+    const ownerStr = uuidBinarioParaString(tarefa.owner);
+    const requesterStr = uuidBinarioParaString(tarefa.requester);
+    
+    if (!isAdmin && (ownerStr !== idUsuario && requesterStr !== idUsuario)) {
       logger.error('Apenas o proprietário ou solicitante podem alterar o status da tarefa');
       throw new Error('Apenas o proprietário ou solicitante podem alterar o status da tarefa');
     }
