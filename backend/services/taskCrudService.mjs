@@ -128,6 +128,7 @@ export const atualizarTarefa = async (idTarefa, dadosAtualizacao, token) => {
 
   // Validação dos argumentos
   if (!idTarefa || typeof idTarefa !== 'string') {
+    logger.error(`ID da tarefa inválido: ${idTarefa}`);
     throw new Error('ID da tarefa inválido');
   }
 

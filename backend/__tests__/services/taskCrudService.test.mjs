@@ -178,7 +178,7 @@ describe('taskCrudService - CRUD de Tarefas', () => {
       verifyToken.mockReturnValue(fakeDecodedAdmin);
       const mockTask = {
         id: new Binary(Buffer.from('d98d1422eb8546eeac283b66692cf180', 'hex'), Binary.SUBTYPE_UUID),
-        title: 'Tarefa Atualizada',
+        title: 'Tarefa Anterior',
         status: 'completed',
         dueDate: new Date(),
         requester: expectedUserId,
@@ -186,17 +186,36 @@ describe('taskCrudService - CRUD de Tarefas', () => {
         owner: expectedUserId,
       };
 
+      const requestChanges = {
+        title: 'Tarefa Atualizada',
+        status: 'completed',
+        dueDate: '2025-03-31T00:00:00.000Z',    
+        description: 'Descrição da tarefa atualizada',
+        owner: '22222222-2222-2222-2222-222222222222',
+        requester: '11111111-1111-1111-1111-111111111111',
+      };
+
+      const updateRequest = {
+        id: new Binary(Buffer.from('d98d1422eb8546eeac283b66692cf180', 'hex'), Binary.SUBTYPE_UUID),
+        title: 'Tarefa Atualizada',
+        status: 'completed',
+        dueDate: new Date('2025-03-31T00:00:00.000Z'),    
+        description: 'Descrição da tarefa atualizada',
+        owner: new Binary(Buffer.from('22222222222222222222222222222222', 'hex'), Binary.SUBTYPE_UUID),
+        requester: new Binary(Buffer.from('11111111111111111111111111111111', 'hex'), Binary.SUBTYPE_UUID),
+      };
+
       mockTasksCollection.updateOne.mockResolvedValue({ matchedCount: 1 });
       mockTasksCollection.findOne.mockResolvedValue(mockTask);
 
       const resultado = await atualizarTarefa('d98d1422-eb85-46ee-ac28-3b66692cf180', 
-        mockTask, token);
+        requestChanges, token);
 
       expect(mockTasksCollection.updateOne).toHaveBeenCalledWith(
         expect.objectContaining({
           id: expect.any(Binary)
         }),
-        { $set: mockTask }
+        { $set: updateRequest }
       );
 
       expect(resultado.status).toBe('completed');

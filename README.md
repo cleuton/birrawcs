@@ -17,8 +17,8 @@ An open-source WCS app, written in NodeJS and React, and using MongoDB
 14. Na listagem de tarefas, elas devem vir em ordem decrescente de "dueDate" e deve ser possível selecionar o status: "todas" ou aquelas com algum status especial. Ok
 15. CRUD tarefa: Ok.
 16. Alterar CRUD inclusão / consulta / alteração para selecionar / mostrar nome do usuário. Ok.
-17. Está com um problema quando excluímos uma tarefa e paginamos no listar tarefas. **Pendente**
-18. Repetir npm test / integration test. **Pendente**
+17. Está com um problema quando excluímos uma tarefa e paginamos no listar tarefas. Ok.
+18. Repetir npm test / integration test. Ok.
 19. Mudar status de uma tarefa (PATCH): **Pendente**
 
 
