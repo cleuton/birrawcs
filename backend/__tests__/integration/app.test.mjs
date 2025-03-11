@@ -286,6 +286,44 @@ describe('Integração - API REST', () => {
         .set('Cookie', adminToken)
         .expect(404);
     });
+
+    it('deve retornar 401 se o token não for fornecido', async () => {
+      const res = await request(server)
+        .patch('/task/12345678')
+        .send({ status: 'working' });
+      expect(res.status).toBe(401);
+      expect(res.body).toHaveProperty('error', 'Não autenticado');
+    });
+
+    it('deve atualizar o status da tarefa se o token for válido', async () => {
+      const novaTarefa = {
+        title: 'Tarefa Teste para PATCH',
+        description: 'Descrição da tarefa de teste para PATCH',
+        status: 'pending',
+        dueDate: new Date().toISOString(),
+        owner: '22222222-2222-2222-2222-222222222222',
+        requester: '11111111-1111-1111-1111-111111111111',
+      };
+  
+      const res2 = await request(server)
+        .post('/task')
+        .set('Cookie', adminToken)
+        .send(novaTarefa)
+        .expect(201);
+  
+      taskIdTeste = res2.body.id; // Agora é uma string UUID válida
+
+      const res = await request(server)
+        .patch(`/task/${taskIdTeste}`)
+        .set('Cookie', adminToken)
+        .send({ status: 'working' });
+      expect(res.status).toBe(204);
+  
+      await request(server)
+        .delete(`/task/${taskIdTeste}`)
+        .set('Cookie', adminToken)
+        .expect(204);
+    });  
   });
 
   // Usuários

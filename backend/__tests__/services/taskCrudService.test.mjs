@@ -1,5 +1,5 @@
 // __tests__/services/taskCrudService.test.mjs
-import { jest } from '@jest/globals';
+import { describe, jest } from '@jest/globals';
 import { Binary } from 'mongodb';
 
 // Mock do módulo de banco de dados
@@ -13,7 +13,7 @@ jest.unstable_mockModule('../../services/authService.mjs', () => ({
 }));
 
 // Importações dinâmicas após definir os mocks
-const { criarTarefa, obterTarefaPorId, listarTarefas, atualizarTarefa, excluirTarefa } = await import('../../services/taskCrudService.mjs');
+const { criarTarefa, obterTarefaPorId, listarTarefas, atualizarTarefa, excluirTarefa, atualizarStatusTarefa } = await import('../../services/taskCrudService.mjs');
 const { getDB } = await import('../../db.mjs');
 const { verifyToken } = await import('../../services/authService.mjs');
 
@@ -253,6 +253,50 @@ describe('taskCrudService - CRUD de Tarefas', () => {
       mockTasksCollection.deleteOne.mockResolvedValue({ deletedCount: 0 });
 
       await expect(excluirTarefa('invalid-id', token)).rejects.toThrow('Tarefa não encontrada');
+    });
+  });
+
+  describe('atualizarStatusTarefa', () => {
+    it('deve atualizar o status de uma tarefa existente', async () => {
+      const fakeDecodedAdmin = { id: '11111111-1111-1111-1111-111111111111', role: 'admin' };
+      verifyToken.mockReturnValue(fakeDecodedAdmin);
+
+      const mockTask = {
+        id: new Binary(Buffer.from('d98d1422eb8546eeac283b66692cf180', 'hex'), Binary.SUBTYPE_UUID),
+        title: 'Tarefa Teste',
+        status: 'pending',
+        dueDate: new Date(),
+        requester: expectedUserId,
+        owner: expectedUserId,
+      };
+
+      const novoStatus = 'completed';
+
+      const updateRequest = {
+        id: new Binary(Buffer.from('d98d1422eb8546eeac283b66692cf180', 'hex'), Binary.SUBTYPE_UUID),
+        status: 'completed',
+      };
+
+      mockTasksCollection.updateOne.mockResolvedValue({ matchedCount: 1 });
+      mockTasksCollection.findOne.mockResolvedValue(mockTask);
+
+      const resultado = await atualizarStatusTarefa('d98d1422-eb85-46ee-ac28-3b66692cf180', novoStatus, token);
+
+      expect(mockTasksCollection.updateOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: expect.any(Binary)
+        }),
+        { $set: {status: 'completed'} }
+      );
+
+    });
+
+    it('deve lançar erro se a tarefa não for encontrada', async () => {
+      const fakeDecodedAdmin = { id: '11111111-1111-1111-1111-111111111111', role: 'admin' };
+      verifyToken.mockReturnValue(fakeDecodedAdmin);
+      mockTasksCollection.updateOne.mockResolvedValue({ matchedCount: 0 });
+
+      await expect(atualizarStatusTarefa('invalid-id', 'completed', token)).rejects.toThrow('Falha ao atualizar status da tarefa');
     });
   });
 });

@@ -92,6 +92,7 @@ export const obterTarefaPorId = async (idTarefa, token) => {
       id: stringParaUuidBinario(idTarefa)
     });
 
+
     if (!tarefa) {
       const errorMessage = 'Tarefa não encontrada';
       throw new Error(errorMessage);
@@ -142,10 +143,10 @@ export const atualizarTarefa = async (idTarefa, dadosAtualizacao, token) => {
 
   try{ 
 
-      // Permitir apenas admins alterarem o owner
+      // Permitir apenas admins a tarefa
       if (!isAdmin) {
-        logger.error('Apenas administradores podem alterar o responsável');
-        throw new Error('Apenas administradores podem alterar o responsável');
+        logger.error('Apenas administradores podem alterar a tarefa');
+        throw new Error('Apenas administradores podem alterar a tarefa');
       }
       if (dadosAtualizacao.hasOwnProperty('_id')) {
         delete dadosAtualizacao._id;
@@ -179,6 +180,68 @@ export const atualizarTarefa = async (idTarefa, dadosAtualizacao, token) => {
     throw new Error('Falha ao atualizar a tarefa');
   }
 };
+
+export const atualizarStatusTarefa = async (idTarefa, novoStatus, token) => {
+  const decodificado = verifyToken(token);
+  const idUsuario = decodificado.id;
+  const isAdmin = decodificado.role === 'admin'; 
+  const db = getDB();
+  const colecaoTarefas = db.collection('tasks');
+
+  // Validação dos argumentos
+  if (!idTarefa || typeof idTarefa !== 'string') {
+    logger.error(`ID da tarefa inválido: ${idTarefa}`);
+    throw new Error('ID da tarefa inválido');
+  }
+  if (!novoStatus || typeof novoStatus !== 'string'
+    || !['pending', 'working', 'completed', 'suspended'].includes(novoStatus)) {
+    logger.error(`Status da tarefa inválido: ${novoStatus}`);
+    throw new Error('Status da tarefa inválido');
+  }
+
+  try{ 
+    const tarefa = await colecaoTarefas.findOne({
+      id: stringParaUuidBinario(idTarefa)
+    });
+
+
+    if (!tarefa) {
+      const errorMessage = 'Tarefa não encontrada';
+      throw new Error(errorMessage);
+    }
+
+    const owner = tarefa.owner;
+    const requester = tarefa.requester;
+    if (!isAdmin && (owner !== idUsuario || requester !== idUsuario)) {
+      logger.error('Apenas o proprietário ou solicitante podem alterar o status da tarefa');
+      throw new Error('Apenas o proprietário ou solicitante podem alterar o status da tarefa');
+    }
+
+    let resultado;
+    try {
+      resultado = await colecaoTarefas.updateOne(
+        { 
+          id: stringParaUuidBinario(idTarefa)
+        },
+        { $set: { status: novoStatus } }
+      );
+    } catch (error) {
+      logger.error(`Falha ao atualizar o status da tarefa: ${error}`);
+      throw new Error('Falha ao atualizar o status da tarefa');
+    }
+    if (resultado.matchedCount === 0) {
+      logger.error('Tarefa não encontrada');
+      throw new Error('Tarefa não encontrada')
+    };
+  
+    return;
+  }
+  catch (error) {
+    logger.error(`Falha ao atualizar status da tarefa: ${error}`);
+    throw new Error('Falha ao atualizar status da tarefa');
+  }
+};
+
 
 export const excluirTarefa = async (idTarefa, token) => {
   const decodificado = verifyToken(token);
