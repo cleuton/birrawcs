@@ -58,8 +58,11 @@ describe('summaryService - getSummary', () => {
     const userIdBuffer = Buffer.from(validDecoded.id.replace(/-/g, ''), 'hex');
     const binaryUserId = new Binary(userIdBuffer, Binary.SUBTYPE_UUID);
     const expectedPipeline = [
-      { $match: { owner: binaryUserId } },
-      { $group: { _id: "$status", count: { $sum: 1 } } },
+      { $match: { $or: [
+        { owner: binaryUserId },
+        { requester: binaryUserId }
+      ] } },
+      { $group: { _id: "$status", count: { $sum: 1 } } }
     ];
     expect(fakeCollection.aggregate).toHaveBeenCalledWith(expectedPipeline);
 

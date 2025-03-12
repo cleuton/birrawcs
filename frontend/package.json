@@ -12,7 +12,9 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build"
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "cypress:open": "cypress open"
   },
   "proxy": "http://localhost:8080",
   "browserslist": {
@@ -26,5 +28,11 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "cypress": "^14.1.0",
+    "jest": "^27.5.1"
   }
 }
