@@ -22,7 +22,7 @@ An open-source WCS app, written in NodeJS and React, and using MongoDB
 19. Mudar status de uma tarefa (PATCH): Falta fazer a parte frontend Ok.
 20. Ao mostrar a tarefa (view) mostra o status em inglês. Ok.
 21. Componente Tasks deveria mostrar link para a tarefa. Ok.
-22. Aplicar estilo Tailwind. **pendente**.
+22. Aplicar estilo CSS. Ok.
 23. Criar testes para os componentes React. **pendente**.
 
 
