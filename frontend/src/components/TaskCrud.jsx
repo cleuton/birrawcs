@@ -86,8 +86,12 @@ const TaskCrud = () => {
         return res.json();
       })
       .then(data => {
-          setMode('view');
-          navigate(`/task/${data.id}`)
+          if (mode === 'create') {
+            navigate(`/dashboard`);
+          } else {
+            setMode('view');
+            navigate(`/task/${id}`)  
+          }
         })
       .catch(err => setError(err.message));
   };
@@ -165,41 +169,68 @@ const TaskCrud = () => {
         </div>
       )}
       {(mode === 'create' || mode === 'edit') && (
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            placeholder="Título"
-            required
-          />
-          <textarea
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            placeholder="Descrição"
-          />
-          <select
-            value={formData.status}
-            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-          >
-            <option value="pending">Pendente</option>
-            <option value="working">Em Progresso</option>
-            <option value="completed">Concluída</option>
-            <option value="suspended">Suspensa</option>
-          </select>
-          <input
-            type="date"
-            value={formData.dueDate}
-            onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-          />
-          <UserSelect 
-            value={selectedUser} 
-            onChange={handleUserSelect} 
-          />          
-          <button type="submit">
-            {mode === 'create' ? 'Criar Tarefa' : 'Atualizar Tarefa'}
-          </button>
-        </form>
+        <div className="task-form-container">
+          <form onSubmit={handleSubmit} className="task-form">
+            <div className='form-group'>
+              <label htmlFor="title">Título</label>
+              <input
+                id="title"
+                type="text"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="Título"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="description">Descrição</label>
+              <textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Descrição"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="status">Status</label>
+              <select
+                id="status"
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              >
+                <option value="pending">Pendente</option>
+                <option value="working">Em Progresso</option>
+                <option value="completed">Concluída</option>
+                <option value="suspended">Suspensa</option>
+              </select>
+            </div> 
+            <div className="form-group">
+              <label htmlFor="dueDate">Prazo</label>                         
+              <input
+                id="dueDate"
+                type="date"
+                value={formData.dueDate}
+                onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+              />
+            </div>
+            <div className="form-group">
+              <label>Responsável</label>            
+              <UserSelect 
+                value={selectedUser} 
+                onChange={handleUserSelect} 
+              />          
+            </div>
+            <div className="form-group">
+              <button type="submit">
+                {mode === 'create' ? 'Criar Tarefa' : 'Atualizar Tarefa'}
+              </button>
+              <button type="button" onClick={() => navigate('/dashboard')}
+                className="cancel-button">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
       )}
     </div>
   );
