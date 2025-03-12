@@ -85,7 +85,10 @@ const TaskCrud = () => {
         if (!res.ok) throw new Error(`Erro ao ${mode === 'create' ? 'criar' : 'atualizar'} tarefa`);
         return res.json();
       })
-      .then(data => navigate(`/task/${id}`))
+      .then(data => {
+          setMode('view');
+          navigate(`/task/${data.id}`)
+        })
       .catch(err => setError(err.message));
   };
 

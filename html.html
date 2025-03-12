@@ -1,29 +1,15 @@
-body {
-  padding-top: 120px; /* Ajuste esse valor conforme a altura total das barras */
-}
-
-/* Classe para aplicar ao H1 desejado, transformando-o em uma barra fixa no topo */
-.header-bar {
-  background-color: #001f3f; /* Azul marinho */
-  color: white;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  padding: 0.5rem 1rem;
-  z-index: 1000; /* Para que fique acima de outros elementos */
-}
-
-/* Estilo para a tag nav, fixada logo abaixo da barra do header */
-nav {
-  background-color: #001f3f; /* Azul marinho */
-  padding: 0.5rem 1rem;
-  position: fixed;
-  top: 65px; /* Ajuste esse valor conforme a altura da sua barra header */
-  left: 0;
-  width: 100%;
-  z-index: 999; /* Um z-index menor que o do header */
-}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Exemplo de Nav com Submenu</title>
+  <style>
+    /* Barra de navegação superior */
+    nav {
+      background-color: #001f3f; /* Azul marinho */
+      padding: 0.5rem 1rem;
+    }
 
     /* Lista principal da navegação */
     .nav-list {
@@ -93,3 +79,30 @@ nav {
       width: 100%;
       text-align: left;
     }
+  </style>
+</head>
+<body>
+  <nav>
+    <ul class="nav-list">
+      <li>
+        <a class="nav-button" href="#">Dashboard</a>
+      </li>
+      <li class="nav-item">
+        <!-- Usamos <button> para que o elemento seja interativo -->
+        <button type="button" class="nav-button">Tarefas</button>
+        <ul class="nav-submenu">
+          <li>
+            <a class="nav-button" href="#">Listar Tarefas</a>
+          </li>
+          <li>
+            <a class="nav-button" href="#">Criar Tarefa</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a class="nav-button" href="#">Notas</a>
+      </li>
+    </ul>
+  </nav>
+</body>
+</html>

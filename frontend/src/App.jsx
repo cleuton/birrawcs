@@ -59,50 +59,37 @@ function AppContent() {
 
   return (
     <div className="App">
-      <h1>Bem-vindo ao BirraApp</h1>
+      <h1 className="header-bar">Bem-vindo ao BirraApp</h1>
       {isAuthenticated && (
         <nav>
-          <ul>
-            {/* Dashboard */}
-            <li>
-              <Link to="/dashboard">Dashboard</Link>
-            </li>
-
-            {/* Notas */}
-            <li>
-              <Link to="/notes">Notas</Link>
-            </li>
-
-            {/* Tarefas com submenu condicional */}
-            <li className="nav-item">
-              Tarefas
-              <ul className="nav-submenu">
-                {/* Listar tarefas (visível para todos usuários autenticados) */}
+        <ul className="nav-list">
+          <li>
+            <Link className="nav-button" to="/dashboard">Dashboard</Link>
+          </li>
+          <li>
+            <Link className="nav-button" to="/notes">Notas</Link>
+          </li>
+          <li className="nav-item">
+            {/* Usamos <button> para que o elemento seja clicável */}
+            <button type="button" className="nav-button">Tarefas</button>
+            <ul className="nav-submenu">
+              <li>
+                <Link className="nav-button" to="/tasks">Listar</Link>
+              </li>
+              {userRole === 'admin' && (
                 <li>
-                  <Link to="/tasks">Listar</Link>
+                  <Link className="nav-button" to="/task/new">Criar Tarefa</Link>
                 </li>
-
-                {/* Criar tarefa (apenas para admins) */}
-                {userRole === 'admin' && (
-                  <li>
-                    <Link to="/task/new">Criar Tarefa</Link>
-                  </li>
-                )}
-              </ul>
-            </li>
-
-            {/* Botão de logout */}
-            <li>
-              <button
-                onClick={handleLogout}
-                className="logout-button"
-              >
-                Sair
-              </button>
-            </li>
-          </ul>
-        </nav>
-      )}
+              )}
+            </ul>
+          </li>
+          <li>
+            <button type="button" onClick={handleLogout} className="nav-button logout-button">
+              Sair
+            </button>
+          </li>
+        </ul>
+      </nav>      )}
 
       <Routes>
         <Route

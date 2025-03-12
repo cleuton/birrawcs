@@ -90,7 +90,7 @@ db.users.insertMany([
     email: "user3@example.com",
     name: "Usuário 3",
     // Hash da senha "senha3"
-    hashpw: "$2b$10$47Kd/qVt7.xCP4Wt0Y7OpegSzL9ebTEA9ckUfooBAs7Y3Jrd4yQiC",
+    hashpw: "$2b$10$HTq43TeK4LM5M2U1IVEucen5DEv3G0VSAQJs3O8gv3ECvxUgP.XmS",
     admin: false
   },
   {
@@ -98,7 +98,7 @@ db.users.insertMany([
     email: "user4@example.com",
     name: "Usuário 4",
     // Hash da senha "senha4"
-    hashpw: "$2b$10$xmeXOiW/Pko3MSmH2uGnoe8YgkCXovjQuJX6U6L/opJePkxU6xWji",
+    hashpw: "$2b$10$x7pa26rvfozl2nNL7lv2zemKoxuJmDawB8YOoqnslUmVUk2KndtqS",
     admin: false
   }      
 ]);

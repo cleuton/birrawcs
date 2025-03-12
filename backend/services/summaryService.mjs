@@ -15,10 +15,12 @@ export async function getSummary(token) {
     const tasksCollection = db.collection('tasks');
   
     const pipeline = [
-      { $match: { owner: binaryUserId } },
+      { $match: { $or: [
+        { owner: binaryUserId },
+        { requester: binaryUserId }
+      ] } },
       { $group: { _id: "$status", count: { $sum: 1 } } }
     ];
-  
     const results = await tasksCollection.aggregate(pipeline).toArray();
   
     const summary = {
