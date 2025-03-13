@@ -23,10 +23,12 @@ An open-source WCS app, written in NodeJS and React, and using MongoDB
 20. Ao mostrar a tarefa (view) mostra o status em inglês. Ok.
 21. Componente Tasks deveria mostrar link para a tarefa. Ok.
 22. Aplicar estilo CSS. Ok.
-23. Criar testes para os componentes React. Unitários Ok, integração com problema **pendente**.
+23. Criar testes para os componentes React. Unitários Ok, integração com problema Ok.
 
 
 ## Para executar os testes
+
+### Backend
 
 ```shell
 cd backend 
@@ -35,3 +37,19 @@ npm test
 
 npm run test:integration
 ```
+
+### Frontend
+
+```shell
+cd frontend
+npm test
+```
+
+selecione "a" para rodar todos os testes.
+
+```shell
+npm run cypress:open
+```
+
+procurar a spec `cypress/e2e/app.cy.js` ou `cypress/e2e/login-dashboard.cy.js`. Executar. 
+
