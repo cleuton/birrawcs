@@ -4,6 +4,8 @@
 
 - Para os cursos: **Frontend Studio - React** e **Backend Wiz**.
 
+> **Nota**: O objetivo desta aplicação é servir de exemplo. Nem todos os casos de uso estão implementados, deixando essa tarefa a cargo do aluno.
+
 ## Para executar os testes
 
 ### Backend
