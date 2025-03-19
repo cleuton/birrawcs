@@ -3,6 +3,7 @@
 # Aplicação modelo 
 
 - Para os cursos: **Frontend Studio - React** e **Backend Wiz**.
+- Clone o [**repositório**](https://github.com/cleuton/birrawcs) do projeto. 
 
 > **Nota**: O objetivo desta aplicação é servir de exemplo. Nem todos os casos de uso estão implementados, deixando essa tarefa a cargo do aluno.
 
@@ -155,6 +156,8 @@ A seguir, um guia simples para instalar **Node.js**, **npm**, **npx** e **Docker
 ```shell
 cd backend 
 
+npm install # Só na primeira vez após clonar o repositório
+
 npm test
 
 npm run test:integration
@@ -164,10 +167,13 @@ npm run test:integration
 
 ```shell
 cd ../frontend
+
+npm install # Só na primeira vez que clonar o repositório
+
 npm test
 ```
 
-selecione "a" para rodar todos os testes. Testes **E2E**:
+selecione "a" para rodar todos os testes. Testes **E2E**: (O frontend e o backend precisam estar rodando)
 
 ```shell
 npm run cypress:open
@@ -224,6 +230,9 @@ Vá para a pasta raiz do projeto e:
 
 ```shell
 cd backend
+
+npm install # Só na primeira vez que clonar o repositório
+
 npm start
 ```
 
