@@ -188,10 +188,22 @@ procurar a spec `cypress/e2e/app.cy.js` ou `cypress/e2e/login-dashboard.cy.js`. 
 Você deve ter o **Docker** instalado. Execute o comando: 
 
 ```shell
+cd database
+mkdir data
 docker run --name birradb -d \
   -p 27017:27017 \
   -v "$PWD/data:/data/db" \
   -v "$PWD/inicializacao.js:/docker-entrypoint-initdb.d/init.js" \
+  mongo:latest
+```
+
+Se estiver usando `macos`: 
+```shell
+sudo docker run --name birradb -d \
+  -p 27017:27017 \
+  -v "$PWD/data:/data/db" \
+  -v "$PWD/inicializacao.js:/docker-entrypoint-initdb.d/init.js" \
+  --user "$(id -u):$(id -g)" \
   mongo:latest
 ```
 
