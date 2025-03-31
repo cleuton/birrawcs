@@ -1,5 +1,6 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 
 // Importa os routers das rotas
 import loginRoutes from './routes/login.mjs';
@@ -18,6 +19,7 @@ const port = process.env.PORT || 8080;
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors())
 
 // Usa os routers importados
 app.use(loginRoutes);
