@@ -19,8 +19,7 @@ const port = process.env.PORT || 8080;
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors())
-
+app.use(cors());
 // Usa os routers importados
 app.use(loginRoutes);
 app.use(summaryRoutes);
